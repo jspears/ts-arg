@@ -99,23 +99,23 @@ const strFn = (v: string) => v;
 const jsonFn = (v: string) => JSON.parse(v);
 const splitFn = (v) => v.split(/,\s*/);
 
-export const CONVERTERS = new Map<any, Converter>();
-CONVERTERS.set('Int', v => parseInt(v, 10));
-CONVERTERS.set('Number', parseFloat);
-CONVERTERS.set('number', parseFloat);
-CONVERTERS.set('Boolean', jsonFn);
-CONVERTERS.set('boolean', jsonFn);
-CONVERTERS.set('String', strFn);
-CONVERTERS.set('string', strFn);
-CONVERTERS.set('JSON', jsonFn);
-CONVERTERS.set('Date', jsonFn);
-CONVERTERS.set('[]', splitFn);
-CONVERTERS.set(Number, parseFloat);
-CONVERTERS.set(String, strFn);
-CONVERTERS.set(Boolean, jsonFn);
-CONVERTERS.set(Date, jsonFn);
-CONVERTERS.set(Array, splitFn);
-
+export const CONVERTERS = new Map<any, Converter>([
+    ['Int', v => parseInt(v, 10)],
+    ['Number', parseFloat],
+    ['number', parseFloat],
+    ['Boolean', jsonFn],
+    ['boolean', jsonFn],
+    ['String', strFn],
+    ['string', strFn],
+    ['JSON', jsonFn],
+    ['Date', jsonFn],
+    ['[]', splitFn],
+    [Number, parseFloat],
+    [String, strFn],
+    [Boolean, jsonFn],
+    [Date, jsonFn],
+    [Array, splitFn],
+]);
 const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void => {
 
     const sorted = conf.concat().sort((a, b) => {
@@ -123,8 +123,8 @@ const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void 
             return -1;
         }
         return a.key.localeCompare(b.key);
-
     });
+
     if (message) {
         message = `${chalk.red('Error')}: ${message}\n\n`
     }
