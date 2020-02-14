@@ -12,7 +12,13 @@
       "es2018"
     ]
   },
-  "exclude": [
-    "public/**"
-  ]
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "docs",
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "exclude": [
+      "**/__test__/**"
+    ]
+  }
 }

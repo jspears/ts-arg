@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Arg, configure} from "../Args";
+import {Arg, configure} from "../index";
 
 const test = (Clazz: any, res: any, ...args: string[]) => expect(configure(new Clazz, ['', 'script', ...args])).to.eql(res);
 
@@ -163,5 +163,23 @@ describe('Args', function () {
             test(HasLong, {what: 'stuff'}, '-m', 'stuff');
         });
 
-    })
+    });
+
+    describe('converter', function () {
+        it('should parse with converter', () => {
+            class HasConverter {
+                @Arg({converter: (v) => `-${v}-`})
+                what: string;
+            }
+            test(HasConverter, {what: '-stuff-'}, '--what', 'stuff');
+        });
+
+        it('should parse with converter fn', () => {
+            class HasConverter {
+                @Arg((v) => `-${v}-`)
+                what: string;
+            }
+            test(HasConverter, {what: '-stuff-'}, '--what', 'stuff');
+        });
+    });
 });

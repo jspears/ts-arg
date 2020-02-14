@@ -7,8 +7,9 @@
   "author": "speajus@gmail.com",
   "license": "MIT",
   "scripts": {
+    "docs": "typedoc",
     "test": "mocha -r ts-node/register ./src/__test__/**/*-test.ts*",
-    "prepare": "tsc"
+    "prepare": "$npm_execpath run test && tsc && typedoc"
   },
   "dependencies": {
     "@types/node": "^13.7.1",
@@ -22,6 +23,7 @@
     "typescript": "^3.7.5",
     "@types/mocha": "^7.0.1",
     "@types/chai": "^4.2.9",
-    "ts-node": "^8.6.2"
+    "ts-node": "^8.6.2",
+    "typedoc": "^0.16.9"
   }
 }
