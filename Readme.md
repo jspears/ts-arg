@@ -12,7 +12,7 @@ either in your tsconfig.json or your command line parameters.
 Add the `@Arg` decorator to the class you want to use for your CLI.
 
 ### Example
-
+See a full example in [./example](./example)
 ```ts static
 import {Arg, configure} from "ts-arg";
 
