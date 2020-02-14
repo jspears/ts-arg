@@ -3,3 +3,4 @@ lib
 .idea
 *.log
 **/__test__/**
+example

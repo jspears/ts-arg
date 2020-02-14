@@ -77,7 +77,7 @@ const arrayType = (v: ArgType): string | any => v.itemType != null ? v.itemType 
  * @param description - Either a description a converter or a configuration argument.
  **/
 export function Arg(description?: ArgType | string | Converter) {
-    const conf = description == null ? undefined : typeof description === 'string' ? {description} : typeof description == 'function' ? {converter: description} : description;
+    const conf = description == null ? {} : typeof description === 'string' ? {description} : typeof description == 'function' ? {converter: description} : description;
     return function (target: any, propertyKey?: string) {
         const m = Reflect.getMetadata(argMetadataKey, target);
         const arg: ArgType = {
@@ -88,6 +88,17 @@ export function Arg(description?: ArgType | string | Converter) {
             ...conf
         };
         if (m) {
+            const sameLongOrShort = m.find(({long, short}) => long == arg.long || short == arg.short);
+            if (sameLongOrShort) {
+                throw new Error(`Can not have 2 properties with same long or short names. '${sameLongOrShort.long}' or '${sameLongOrShort.short}' is already used.`);
+            }
+            if (arg.default) {
+                const hasDefault = m.find(v => v.default);
+                if (hasDefault) {
+                    throw new Error(`There are multiple properties marked as default check '${hasDefault.key}'`)
+                }
+            }
+
             m.push(arg);
         } else {
             Reflect.metadata(argMetadataKey, [arg])(target);
@@ -98,7 +109,7 @@ export function Arg(description?: ArgType | string | Converter) {
 const strFn = (v: string) => v;
 const jsonFn = (v: string) => JSON.parse(v);
 const splitFn = (v) => v.split(/,\s*/);
-
+const dateFn = (v) => new Date(v);
 export const CONVERTERS = new Map<any, Converter>([
     ['Int', v => parseInt(v, 10)],
     ['Number', parseFloat],
@@ -108,18 +119,20 @@ export const CONVERTERS = new Map<any, Converter>([
     ['String', strFn],
     ['string', strFn],
     ['JSON', jsonFn],
-    ['Date', jsonFn],
+    ['Date', dateFn],
     ['[]', splitFn],
+    ['Array', splitFn],
     [Number, parseFloat],
     [String, strFn],
     [Boolean, jsonFn],
-    [Date, jsonFn],
+    [Date, dateFn],
     [Array, splitFn],
 ]);
 const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void => {
 
     const sorted = conf.concat().sort((a, b) => {
-        if (a.required || b.required) {
+
+        if (a.required != b.required && (a.required || b.required)) {
             return -1;
         }
         return a.key.localeCompare(b.key);

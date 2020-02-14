@@ -171,6 +171,7 @@ describe('Args', function () {
                 @Arg({converter: (v) => `-${v}-`})
                 what: string;
             }
+
             test(HasConverter, {what: '-stuff-'}, '--what', 'stuff');
         });
 
@@ -179,7 +180,87 @@ describe('Args', function () {
                 @Arg((v) => `-${v}-`)
                 what: string;
             }
+
             test(HasConverter, {what: '-stuff-'}, '--what', 'stuff');
         });
     });
+
+    describe('json', function () {
+        class HasJson {
+            @Arg({"type": "JSON"})
+            json
+        }
+
+        it('should parse json', function () {
+            test(HasJson, {json: {what: 1}}, '--json', JSON.stringify({what: 1}))
+        });
+
+        it('should parse json=', function () {
+            test(HasJson, {json: {what: 1}}, `--json=${JSON.stringify({what: 1})}`)
+        });
+
+        it('should work as default', function () {
+            class HasJsonDefault {
+                @Arg()
+                what: boolean;
+
+                @Arg({"type": "JSON", default: true})
+                json: any;
+            }
+
+            test(HasJsonDefault, {json: {what: 1}, what: true}, '-w', `${JSON.stringify({what: 1})}`)
+
+        })
+    });
+
+    describe('date', function () {
+        class HasDate {
+            @Arg()
+            date: Date;
+        }
+
+        const hd = configure(new HasDate(), ['', '', '--date', '10/10/10']);
+        if(hd) {
+            expect(hd.date.getFullYear()).to.eql(2010);
+            expect(hd.date.getMonth()).to.eql(9);
+            expect(hd.date.getDate()).to.eql(10);
+
+        }else{
+            expect(hd).to.exist;
+        }
+    });
+
+    describe('errors', function () {
+        it('should error when 2 properties have same short', function () {
+            let error;
+            try {
+                class Duplicate {
+                    @Arg("what")
+                    what: string;
+                    @Arg("won")
+                    won: string;
+                }
+            } catch (e) {
+                error = e;
+            } finally {
+                expect(error.message).to.eql('Can not have 2 properties with same long or short names. \'what\' or \'w\' is already used.');
+            }
+
+        });
+        it('should error if more than one property is marked default', function () {
+            let error;
+            try {
+                class Required {
+                    @Arg({default: true})
+                    what: string;
+                    @Arg({default: true})
+                    on: string;
+                }
+            } catch (e) {
+                error = e;
+            } finally {
+                expect(error.message).to.eql('There are multiple properties marked as default check \'what\'');
+            }
+        });
+    })
 });

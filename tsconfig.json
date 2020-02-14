@@ -12,6 +12,9 @@
       "es2018"
     ]
   },
+  "exclude": [
+    "**/example/**"
+  ],
   "typedocOptions": {
     "mode": "modules",
     "out": "docs",

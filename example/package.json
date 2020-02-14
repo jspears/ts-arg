@@ -1,18 +1,20 @@
 {
-  "name": "ts-arg",
+  "name": "ts-arg-example",
   "version": "1.0.0",
-  "description": "Decorator based argument parsing for typescript",
+  "description": "Example for ts-arg",
   "main": "lib",
   "types": "src",
-  "repository": "https://github.com/jspears/ts-arg",
+  "bin": {
+    "ts-arg-example": "./bin/cli.js"
+  },
+  "repository": "https://github.com/jspears/ts-arg/example",
   "author": "speajus@gmail.com",
   "license": "MIT",
   "scripts": {
-    "docs": "typedoc",
-    "test": "mocha -r ts-node/register ./src/__test__/**/*-test.ts*",
-    "prepare": "$npm_execpath run test && tsc && typedoc"
+    "prepare": "tsc"
   },
   "dependencies": {
+    "ts-arg": "^1.0.0",
     "@types/node": "^13.7.1",
     "chalk": "^3.0.0",
     "reflect-metadata": "^0.1.13"
@@ -24,7 +26,6 @@
     "@types/mocha": "^7.0.1",
     "@types/chai": "^4.2.9",
     "ts-node": "^8.6.2",
-    "typedoc": "^0.16.9",
-    "nyc": "^15.0.0"
+    "typedoc": "^0.16.9"
   }
 }
