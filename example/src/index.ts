@@ -9,13 +9,13 @@ class Options {
     expires: Date;
 
     @Arg({default: true, required: true})
-    files: string[]
+    files: string[];
 
     @Arg((v) => `-${v}-`)
     strike: string;
 
     @Arg('watch for changes')
-    watch:boolean;
+    watch: boolean;
 
 }
 

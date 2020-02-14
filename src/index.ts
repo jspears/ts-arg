@@ -6,71 +6,73 @@
  */
 import chalk from "chalk";
 import "reflect-metadata";
+import {ArgType, HelpFn, Converter, ConverterMap} from "./types";
 
 const argMetadataKey = Symbol("argMetadataKey");
-
-/**
- * @param v converts a string into the type the class is expecting.
- */
-export type Converter = (v: string) => any;
-/**
- * A map that allows for lookups of converters.
- */
-export type ConverterMap = Map<any, Converter>;
-/**
- * A configuration object for the `@Arg` decorator.
- */
-export type ArgType = {
-    key?: string,
-    /**
-     * The long version of your argument (--arg) (optional) defaults to property key.
-     */
-    long?: string
-    /**
-     * The short version of your argument (-a) defaults to the first letter of long.
-     */
-    short?: string,
-    /**
-     * A description of your argument for use in help messages.
-     */
-    description?: string,
-    /**
-     * Is this field required.
-     */
-    required?: boolean,
-    /**
-     * Is this the default parameter that will recieve values if no parameter name is given
-     */
-    default?: boolean,
-    /**
-     * The type, automatically inferred.  Can be set manually.
-     */
-    type?: 'Boolean' | 'String' | 'Number' | 'Int' | 'JSON' | '[]' | any,
-    /**
-     * The string to type converter to use.
-     */
-    converter?: Converter,
-    /**
-     * If an array the type inside the array.
-     */
-    itemType?: 'Boolean' | 'String' | 'Number' | 'Int' | 'JSON' | any,
-}
-
-/**
- * This function is called when `configure` fails.   The default implementation exists with `process.exit(1)`,  If you
- * provide your own it can do as you want.
- *
- * @param script - the name of the running script defaults to process.argv[1]
- * @param conf - the configured argument types.
- * @param message - the error message to show on failure.
- */
-export type HelpFn = (script: string, conf: ArgType[], message?: string) => void;
-
 
 const isArrayType = (v: ArgType) => v.itemType != null || v.type === Array || (typeof v.type == 'string' && v.type.endsWith('[]'));
 
 const arrayType = (v: ArgType): string | any => v.itemType != null ? v.itemType : typeof v.type === 'string'
-    ? v.type.replace(/\[\]$/, '') : 'string';
+    ? v.type.replace(/\[\]$/, '') || 'string' : 'string';
+
+const _niceType = (type: any): string => {
+    if (isBoolean(type)) {
+        return 'boolean';
+    }
+    if (type === Number || type === 'number' || type === 'Number') {
+        return 'number';
+    }
+    if (type === String || type === 'string' || type === 'String') {
+        return 'string';
+    }
+    if (type === Date || type === 'Date') {
+        return 'Date';
+    }
+    if (type === Symbol || type == 'symbol') {
+        return 'symbol';
+    }
+    if (type === Array || type === 'Array' || /\[\]$/.test(type)) {
+        return '[]';
+    }
+    return 'string';
+
+};
+const niceType = (v: ArgType): string => isArrayType(v) ?
+    `${v.itemType ? _niceType(v.itemType) : ''}[]` : _niceType(v.type);
+
+const niceKey = (v: ArgType): string | number => typeof v.key == 'symbol' ? v.long : v.key;
+
+const isBoolean = (v: any): boolean => (v === Boolean || v === 'boolean' || v === 'Boolean');
+
+
+const addArg = (target: any, conf: ArgType, propertyKey: string | symbol, type: any): ArgType[] => {
+    const arg: ArgType = {
+        key: propertyKey,
+        long: typeof propertyKey === 'symbol' ? conf.long : propertyKey,
+        short: (conf.long || propertyKey)[0],
+        type,
+        ...conf
+    };
+    const m = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
+
+    if (m) {
+        const sameLongOrShort = m.find(({long, short}) => long == arg.long || short == arg.short);
+        if (sameLongOrShort) {
+            throw `Can not have 2 properties with same long or short names. '${sameLongOrShort.long}' or '${sameLongOrShort.short}' is already used, check '${niceKey(sameLongOrShort)}'.`;
+        }
+        if (arg.default) {
+            const hasDefault = m.find(v => v.default);
+            if (hasDefault) {
+                throw `There are multiple properties marked as default, check '${niceKey(hasDefault)}'`;
+            }
+        }
+        m.push(arg);
+        return m;
+    }
+    const ret = [arg];
+    Reflect.metadata(argMetadataKey, ret)(target);
+    return ret;
+};
 
 /**
  * This a decorator for properties fields in typescript classes.
@@ -78,31 +80,9 @@ const arrayType = (v: ArgType): string | any => v.itemType != null ? v.itemType 
  **/
 export function Arg(description?: ArgType | string | Converter) {
     const conf = description == null ? {} : typeof description === 'string' ? {description} : typeof description == 'function' ? {converter: description} : description;
-    return function (target: any, propertyKey?: string) {
-        const m = Reflect.getMetadata(argMetadataKey, target);
-        const arg: ArgType = {
-            key: propertyKey,
-            long: propertyKey,
-            short: (conf.long || propertyKey)[0],
-            type: Reflect.getMetadata("design:type", target, propertyKey),
-            ...conf
-        };
-        if (m) {
-            const sameLongOrShort = m.find(({long, short}) => long == arg.long || short == arg.short);
-            if (sameLongOrShort) {
-                throw new Error(`Can not have 2 properties with same long or short names. '${sameLongOrShort.long}' or '${sameLongOrShort.short}' is already used.`);
-            }
-            if (arg.default) {
-                const hasDefault = m.find(v => v.default);
-                if (hasDefault) {
-                    throw new Error(`There are multiple properties marked as default check '${hasDefault.key}'`)
-                }
-            }
 
-            m.push(arg);
-        } else {
-            Reflect.metadata(argMetadataKey, [arg])(target);
-        }
+    return function (target: any, propertyKey?: string | symbol) {
+        addArg(target, conf, propertyKey, Reflect.getMetadata("design:type", target, propertyKey));
     }
 }
 
@@ -128,21 +108,31 @@ export const CONVERTERS = new Map<any, Converter>([
     [Date, dateFn],
     [Array, splitFn],
 ]);
+const _usage = (conf: ArgType[]): string => {
+    const shorts = conf.filter(v => !v.default).map(v => v.short).join('');
+    const def = conf.find(v => v.default);
+    if (def) {
+        return `-${shorts} ${isArrayType(def) ? `[${def.long} ...]` : def.long}`
+    }
+    return `-${shorts}`;
+};
+
+
 const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void => {
 
     const sorted = conf.concat().sort((a, b) => {
 
-        if (a.required != b.required && (a.required || b.required)) {
-            return -1;
+        if (a.required != b.required) {
+            return a.required ? -1 : 1;
         }
-        return a.key.localeCompare(b.key);
+        return a.default ? 1 : a.long.localeCompare(b.long);
     });
 
     if (message) {
         message = `${chalk.red('Error')}: ${message}\n\n`
     }
-    console.warn(`${message} ${script}\n - Usage:
-    ${sorted.map(v => `\v${v.required ? '*' : ' '}\t--${v.key} -${v.short} \t${v.description || ''} `).join('\n')}
+    console.warn(`${message || ''}${script}\nusage: ${_usage(sorted)}
+${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.description || ''} `).join('\n')}
 
 `);
 
@@ -153,7 +143,7 @@ const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void 
  * @param target - Is the object to configure
  * @param args - `process.argv` or your own array of strings.
  * @param converters - A Map of converters that take a string and return a value.
- * @param help - A function for help, this one call process.exit(1) on invocation, you may not want that.
+ * @param help - A function for help, this one call on invocation, you may not want that.
  */
 export const configure = <T>(target: T,
                              args: string[] = process.argv,
@@ -161,11 +151,6 @@ export const configure = <T>(target: T,
                              help: HelpFn = _help): T | undefined | void => {
     const script = args[1];
     const conf = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
-
-    function resolveConvert(this: ArgType, v: string): any {
-        const converter = converters.get(arrayType(this)) || strFn;
-        return converter(v);
-    }
 
     if (args.includes('-h') || args.includes('--help')) {
         return help(script, conf);
@@ -178,13 +163,9 @@ export const configure = <T>(target: T,
             if (arg === `-${v.short}` || arg === `--${v.long}`) {
                 return true;
             }
-            if (v.type === Boolean) {
-                if (arg === `--no-${v.long}`) {
-                    return true;
-                }
-            }
-            return false;
+            return isBoolean(v.type) && arg === `--no-${v.long}`;
         });
+        
         //Keep found because if a default option is present it will suck up the rest of the values.
         const c = found || conf.find(v => v.default);
 
@@ -193,7 +174,7 @@ export const configure = <T>(target: T,
         }
 
         const convert = c.converter || converters.get(c.type) || strFn;
-        if (c.type === Boolean) {
+        if (isBoolean(c.type)) {
             target[c.key] = value != null ? convert(value) : !arg.startsWith('--no-');
         } else {
             try {
@@ -207,7 +188,7 @@ export const configure = <T>(target: T,
                     target[c.key] = convert(unparsedValue);
                 }
             } catch (e) {
-                return help(script, conf, `Converting '${value ?? args[i]}' to type '${c.type}' failed\n ${e.message || e}`);
+                return help(script, conf, `Converting '${value ?? args[i]}' to type '${niceType(c.type)}' failed\n ${e.message || e}`);
             }
         }
     }
@@ -215,7 +196,7 @@ export const configure = <T>(target: T,
 
     const fail = conf.find(v => v.required && target[v.key] == null);
     if (fail) {
-        return help(script, conf, `Required argument '${fail.key}' was not supplied.`);
+        return help(script, conf, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
     }
     return target;
 };

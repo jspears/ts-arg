@@ -220,12 +220,12 @@ describe('Args', function () {
         }
 
         const hd = configure(new HasDate(), ['', '', '--date', '10/10/10']);
-        if(hd) {
+        if (hd) {
             expect(hd.date.getFullYear()).to.eql(2010);
             expect(hd.date.getMonth()).to.eql(9);
             expect(hd.date.getDate()).to.eql(10);
 
-        }else{
+        } else {
             expect(hd).to.exist;
         }
     });
@@ -243,12 +243,12 @@ describe('Args', function () {
             } catch (e) {
                 error = e;
             } finally {
-                expect(error.message).to.eql('Can not have 2 properties with same long or short names. \'what\' or \'w\' is already used.');
+                expect(error).to.eql('Can not have 2 properties with same long or short names. \'what\' or \'w\' is already used, check \'what\'.');
             }
 
         });
         it('should error if more than one property is marked default', function () {
-            let error;
+            let error: string;
             try {
                 class Required {
                     @Arg({default: true})
@@ -259,8 +259,49 @@ describe('Args', function () {
             } catch (e) {
                 error = e;
             } finally {
-                expect(error.message).to.eql('There are multiple properties marked as default check \'what\'');
+                expect(error).to.eql('There are multiple properties marked as default, check \'what\'');
             }
         });
+    });
+    describe('help', function () {
+        class Help {
+            @Arg("what")
+            what: string;
+            @Arg("won")
+            on: string;
+        }
+
+        it('should -h', function () {
+            const owarn = console.warn;
+            let warn = [];
+            console.warn = (...args) => warn.push(args);
+            expect(configure(new Help, ['', 'help-script', '-h'])).to.not.exist;
+            console.warn = owarn;
+
+            expect(warn).to.eql([[
+                "help-script\nusage: -ow\n    --on\t-o\twon \n    --what\t-w\twhat \n\n"
+            ]])
+        });
+        it('should --help', function () {
+            expect(configure(new Help, ['', 'help-script', '--help'])).to.not.exist;
+        });
+        it('should error', function () {
+            class HasError {
+                @Arg((more) => {
+                    throw `Error ${more}`
+                })
+                stuff: string;
+            }
+
+            const owarn = console.warn;
+            let warn = [];
+            console.warn = (...args) => warn.push(args);
+            expect(configure(new HasError, ['', 'help-script', '--stuff', 'more'])).to.not.exist;
+            console.warn = owarn;
+            expect(warn).to.eql([[
+                "\u001b[31mError\u001b[39m: Converting 'more' to type 'string' failed\n Error more\n\nhelp-script\nusage: -s\n    --stuff\t-s\t \n\n"
+            ]]);
+
+        })
     })
 });

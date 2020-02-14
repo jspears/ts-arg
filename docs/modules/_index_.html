@@ -69,15 +69,6 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Type aliases</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_index_.html#argtype" class="tsd-kind-icon">Arg<wbr>Type</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_index_.html#converter-1" class="tsd-kind-icon">Converter</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_index_.html#convertermap" class="tsd-kind-icon">Converter<wbr>Map</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_index_.html#helpfn" class="tsd-kind-icon">Help<wbr>Fn</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_index_.html#converters" class="tsd-kind-icon">CONVERTERS</a></li>
@@ -94,203 +85,6 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Type aliases</h2>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
-					<a name="argtype" class="tsd-anchor"></a>
-					<h3>Arg<wbr>Type</h3>
-					<div class="tsd-signature tsd-kind-icon">Arg<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>converter<span class="tsd-signature-symbol">?: </span><a href="_index_.html#converter-1" class="tsd-signature-type">Converter</a><span class="tsd-signature-symbol">; </span>default<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>description<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>itemType<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">"Boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"String"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Number"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Int"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"JSON"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>key<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>long<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>required<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>short<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">"Boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"String"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Number"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Int"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"JSON"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"[]"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L23">index.ts:23</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A configuration object for the <code>@Arg</code> decorator.</p>
-						</div>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> converter<span class="tsd-signature-symbol">?: </span><a href="_index_.html#converter-1" class="tsd-signature-type">Converter</a></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>The string to type converter to use.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> default<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>Is this the default parameter that will recieve values if no parameter name is given</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> description<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>A description of your argument for use in help messages.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> item<wbr>Type<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">"Boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"String"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Number"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Int"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"JSON"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>If an array the type inside the array.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> key<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> long<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>The long version of your argument (--arg) (optional) defaults to property key.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> required<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>Is this field required.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> short<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>The short version of your argument (-a) defaults to the first letter of long.</p>
-									</div>
-								</div>
-							</li>
-							<li class="tsd-parameter">
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> type<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">"Boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"String"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Number"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"Int"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"JSON"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"[]"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></h5>
-								<div class="tsd-comment tsd-typography">
-									<div class="lead">
-										<p>The type, automatically inferred.  Can be set manually.</p>
-									</div>
-								</div>
-							</li>
-						</ul>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
-					<a name="converter-1" class="tsd-anchor"></a>
-					<h3>Converter</h3>
-					<div class="tsd-signature tsd-kind-icon">Converter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L15">index.ts:15</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<dl class="tsd-comment-tags">
-							<dt>param</dt>
-							<dd><p>converts a string into the type the class is expecting.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
-								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>v: <span class="tsd-signature-type">string</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
-					<a name="convertermap" class="tsd-anchor"></a>
-					<h3>Converter<wbr>Map</h3>
-					<div class="tsd-signature tsd-kind-icon">Converter<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><a href="_index_.html#converter-1" class="tsd-signature-type">Converter</a><span class="tsd-signature-symbol">&gt;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L19">index.ts:19</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>A map that allows for lookups of converters.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
-					<a name="helpfn" class="tsd-anchor"></a>
-					<h3>Help<wbr>Fn</h3>
-					<div class="tsd-signature tsd-kind-icon">Help<wbr>Fn<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>script<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, conf<span class="tsd-signature-symbol">: </span><a href="_index_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol">[]</span>, message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L67">index.ts:67</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>This function is called when <code>configure</code> fails.   The default implementation exists with <code>process.exit(1)</code>,  If you
-							provide your own it can do as you want.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>param</dt>
-							<dd><p>the name of the running script defaults to process.argv[1]</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the configured argument types.</p>
-							</dd>
-							<dt>param</dt>
-							<dd><p>the error message to show on failure.</p>
-							</dd>
-						</dl>
-					</div>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>script<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, conf<span class="tsd-signature-symbol">: </span><a href="_index_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol">[]</span>, message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>script: <span class="tsd-signature-type">string</span></h5>
-											</li>
-											<li>
-												<h5>conf: <a href="_index_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol">[]</span></h5>
-											</li>
-											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> message: <span class="tsd-signature-type">string</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="converters" class="tsd-anchor"></a>
@@ -298,7 +92,7 @@
 					<div class="tsd-signature tsd-kind-icon">CONVERTERS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map&lt;any, Converter&gt;([[&#x27;Int&#x27;, v &#x3D;&gt; parseInt(v, 10)],[&#x27;Number&#x27;, parseFloat],[&#x27;number&#x27;, parseFloat],[&#x27;Boolean&#x27;, jsonFn],[&#x27;boolean&#x27;, jsonFn],[&#x27;String&#x27;, strFn],[&#x27;string&#x27;, strFn],[&#x27;JSON&#x27;, jsonFn],[&#x27;Date&#x27;, dateFn],[&#x27;[]&#x27;, splitFn],[&#x27;Array&#x27;, splitFn],[Number, parseFloat],[String, strFn],[Boolean, jsonFn],[Date, dateFn],[Array, splitFn],])</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L113">index.ts:113</a></li>
+							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/0c3b2de/src/index.ts#L93">index.ts:93</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -309,13 +103,13 @@
 					<a name="arg" class="tsd-anchor"></a>
 					<h3>Arg</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">Arg<span class="tsd-signature-symbol">(</span>description<span class="tsd-signature-symbol">?: </span><a href="_index_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_index_.html#converter-1" class="tsd-signature-type">Converter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
+						<li class="tsd-signature tsd-kind-icon">Arg<span class="tsd-signature-symbol">(</span>description<span class="tsd-signature-symbol">?: </span><a href="_types_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#converter-1" class="tsd-signature-type">Converter</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L79">index.ts:79</a></li>
+									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/0c3b2de/src/index.ts#L81">index.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -326,7 +120,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> description: <a href="_index_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_index_.html#converter-1" class="tsd-signature-type">Converter</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> description: <a href="_types_.html#argtype" class="tsd-signature-type">ArgType</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#converter-1" class="tsd-signature-type">Converter</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Either a description a converter or a configuration argument.</p>
 									</div>
@@ -340,13 +134,13 @@
 					<a name="configure" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> configure</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">configure&lt;T&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, converters<span class="tsd-signature-symbol">?: </span><a href="_index_.html#convertermap" class="tsd-signature-type">ConverterMap</a>, help<span class="tsd-signature-symbol">?: </span><a href="_index_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">configure&lt;T&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, converters<span class="tsd-signature-symbol">?: </span><a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a>, help<span class="tsd-signature-symbol">?: </span><a href="_types_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/fe47635/src/index.ts#L158">index.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/0c3b2de/src/index.ts#L148">index.ts:148</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -379,7 +173,7 @@
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> converters: <a href="_index_.html#convertermap" class="tsd-signature-type">ConverterMap</a><span class="tsd-signature-symbol"> = CONVERTERS</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> converters: <a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a><span class="tsd-signature-symbol"> = CONVERTERS</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
 											<p>A Map of converters that take a string and return a value.</p>
@@ -387,10 +181,10 @@
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> help: <a href="_index_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol"> = _help</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> help: <a href="_types_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol"> = _help</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
-											<p>A function for help, this one call process.exit(1) on invocation, you may not want that.</p>
+											<p>A function for help, this one call on invocation, you may not want that.</p>
 										</div>
 									</div>
 								</li>
@@ -410,22 +204,13 @@
 					<li class="current tsd-kind-external-module">
 						<a href="_index_.html">&quot;index&quot;</a>
 					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_types_.html">&quot;types&quot;</a>
+					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="_index_.html#argtype" class="tsd-kind-icon">Arg<wbr>Type</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="_index_.html#converter-1" class="tsd-kind-icon">Converter</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="_index_.html#convertermap" class="tsd-kind-icon">Converter<wbr>Map</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="_index_.html#helpfn" class="tsd-kind-icon">Help<wbr>Fn</a>
-					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="_index_.html#converters" class="tsd-kind-icon">CONVERTERS</a>
 					</li>

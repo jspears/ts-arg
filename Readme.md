@@ -18,13 +18,13 @@ import {Arg, configure} from "ts-arg";
 
 class MyOptions {
   
-   @Argv('do you want it to be chatty')
+   @Arg('do you want it to be chatty')
    verbose:boolean;
 
-   @Argv({short:'T', description:'What is your T'})
+   @Arg({short:'T', description:'What is your T'})
    tbone:string;
 
-   @Argv("A number of things");
+   @Arg("A number of things");
    count:number;
 
 }

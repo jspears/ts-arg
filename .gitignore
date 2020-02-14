@@ -1,4 +1,5 @@
 .idea
+.nyc_output/
 **/lib/**
 **/*.log
 **/node_modules/**
