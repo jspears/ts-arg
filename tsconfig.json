@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "target": "ES5",
+    "allowJs": false,
+    "declaration": false,
+    "lib": [
+      "es2018"
+    ]
+  },
+  "exclude": [
+    "public/**"
+  ]
+}

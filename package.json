@@ -1,0 +1,27 @@
+{
+  "name": "ts-arg",
+  "version": "1.0.0",
+  "description": "Decorator based argument parsing for typescript",
+  "main": "lib",
+  "repository": "https://github.com/jspears/ts-arg",
+  "author": "speajus@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha -r ts-node/register ./src/__test__/**/*-test.ts*",
+    "prepare": "tsc"
+  },
+  "dependencies": {
+    "@types/node": "^13.7.1",
+    "chalk": "^3.0.0",
+    "chokidar": "^3.3.1",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "mocha": "^7.0.1",
+    "chai": "^4.2.0",
+    "typescript": "^3.7.5",
+    "@types/mocha": "^7.0.1",
+    "@types/chai": "^4.2.9",
+    "ts-node": "^8.6.2"
+  }
+}
