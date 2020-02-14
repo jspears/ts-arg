@@ -1,7 +1,7 @@
 TS-Arg
 ===
 Tool for making decorator based command line argument parsers.
-More info [here](./docs/index.html)
+More info [here](https://jspears.github.io/ts-arg/)
 
 ## Installation
 To use this tool you need to have ``` "experimentalDecorators": true,  "emitDecoratorMetadata": true,``` 
