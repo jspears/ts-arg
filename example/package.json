@@ -1,6 +1,6 @@
 {
   "name": "ts-arg-example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Example for ts-arg",
   "main": "lib",
   "types": "src",
