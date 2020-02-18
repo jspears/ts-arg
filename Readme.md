@@ -7,6 +7,7 @@ More info [here](https://jspears.github.io/ts-arg/)
 To use this tool you need to have ``` "experimentalDecorators": true,  "emitDecoratorMetadata": true,``` 
 either in your tsconfig.json or your command line parameters.
 
+![Node.js CI](https://github.com/jspears/ts-arg/workflows/Node.js%20CI/badge.svg)
 
 ## Usage
 Add the `@Arg` decorator to the class you want to use for your CLI.
