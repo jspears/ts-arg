@@ -298,9 +298,7 @@ describe('Args', function () {
             console.warn = (...args) => warn.push(args);
             expect(configure(new HasError, ['', 'help-script', '--stuff', 'more'])).to.not.exist;
             console.warn = owarn;
-            expect(warn).to.eql([[
-                "\u001b[31mError\u001b[39m: Converting 'more' to type 'string' failed\n Error more\n\nhelp-script\nusage: -s\n    --stuff\t-s\t \n\n"
-            ]]);
+            expect(warn[0][0]).to.contains("Converting 'more' to type 'string' failed\n Error more\n\nhelp-script\nusage: -s\n    --stuff\t-s\t \n\n");
 
         })
     })
