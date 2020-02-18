@@ -4,3 +4,5 @@ lib
 *.log
 **/__test__/**
 example
+.nyc_output
+docs
