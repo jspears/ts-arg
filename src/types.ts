@@ -1,3 +1,27 @@
+export enum Resolution {
+    ARG,
+    ENV,
+    FILE,
+    PACKAGE,
+}
+
+export type ParserFn = (path: string) => any;
+
+export type ConfigOptions = {
+    prefix?: string,
+    rcFile?: string | boolean,
+    argPrefix?: string | boolean,
+    envPrefix?: string | boolean,
+    packageKey?: string | boolean,
+    description?: string,
+    /**
+     * The order to resolve options.
+     */
+    resolution?: [Resolution, Resolution?, Resolution?, Resolution?]
+    checkHomeDir?: boolean,
+    parser?: ParserFn,
+}
+
 /**
  * @param v converts a string into the type the class is expecting.
  */

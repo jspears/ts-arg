@@ -5,10 +5,12 @@
  *
  */
 import chalk from "chalk";
+import * as fs from 'fs';
 import "reflect-metadata";
-import {ArgType, HelpFn, Converter, ConverterMap} from "./types";
+import {ArgType, HelpFn, Converter, ConverterMap, ConfigOptions, ParserFn, Resolution} from "./types";
 
 const argMetadataKey = Symbol("argMetadataKey");
+const configMetadataKey = Symbol("configMetatdataKey");
 
 const isArrayType = (v: ArgType) => v.itemType != null || v.type === Array || (typeof v.type == 'string' && v.type.endsWith('[]'));
 
@@ -34,6 +36,9 @@ const _niceType = (type: any): string => {
     if (type === Array || type === 'Array' || /\[\]$/.test(type)) {
         return '[]';
     }
+    if (type instanceof RegExp) {
+        return 'RegExp';
+    }
     return 'string';
 
 };
@@ -44,6 +49,7 @@ const niceKey = (v: ArgType): string | number => typeof v.key == 'symbol' ? v.lo
 
 const isBoolean = (v: any): boolean => (v === Boolean || v === 'boolean' || v === 'Boolean');
 
+const RESOLUTION: Resolution[] = [Resolution.ARG, Resolution.ENV, Resolution.FILE, Resolution.PACKAGE];
 
 const addArg = (target: any, conf: ArgType, propertyKey: string | symbol, type: any): ArgType[] => {
     const arg: ArgType = {
@@ -86,27 +92,69 @@ export function Arg(description?: ArgType | string | Converter) {
     }
 }
 
+/**
+ * This a decorator for classes to provide env and file support.
+ * @param prefix - Either a description a converter or a configuration argument.
+ **/
+export function Config(prefix?: ConfigOptions | string | ParserFn) {
+
+
+    return function (target: any) {
+        const config = prefix == null ? {prefix: target.name} : typeof prefix === 'string' ? {prefix} : typeof prefix == 'function' ? {
+            prefix: target.name,
+            parser: prefix
+        } : prefix;
+        Reflect.defineMetadata(configMetadataKey, {
+            envPrefix: config.prefix.toUpperCase(),
+            argPrefix: config.prefix,
+            rcFile: `.${config.prefix}`,
+            packageKey: config.prefix,
+            resolution: RESOLUTION,
+            parser(file) {
+                return fs.existsSync(file) && JSON.parse(fs.readFileSync(file, 'utf8'));
+            },
+            ...config,
+
+        }, target);
+    }
+}
+
+
 const strFn = (v: string) => v;
 const jsonFn = (v: string) => JSON.parse(v);
 const splitFn = (v) => v.split(/,\s*/);
 const dateFn = (v) => new Date(v);
+const regexFn = (v) => {
+    if (v.startsWith('/') && v.endsWith('/')) {
+        return new RegExp(v);
+    }
+    const parts = /^\/(.+?)\/(gimus)$/.exec(v);
+    if (parts) {
+        return new RegExp(parts[1], parts[2]);
+    }
+    return new RegExp(`/${v}/`);
+};
+const boolFn = (v) => /true|1|"true"/i.test(v);
+
 export const CONVERTERS = new Map<any, Converter>([
     ['Int', v => parseInt(v, 10)],
     ['Number', parseFloat],
     ['number', parseFloat],
-    ['Boolean', jsonFn],
-    ['boolean', jsonFn],
+    ['Boolean', boolFn],
+    ['boolean', boolFn],
     ['String', strFn],
     ['string', strFn],
     ['JSON', jsonFn],
     ['Date', dateFn],
     ['[]', splitFn],
     ['Array', splitFn],
+    ['RegExp', regexFn],
     [Number, parseFloat],
     [String, strFn],
-    [Boolean, jsonFn],
+    [Boolean, boolFn],
     [Date, dateFn],
     [Array, splitFn],
+    [RegExp, regexFn]
 ]);
 const _usage = (conf: ArgType[]): string => {
     const shorts = conf.filter(v => !v.default).map(v => v.short).join('');
@@ -138,6 +186,11 @@ ${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.des
 
     return;
 };
+
+type ArgTypeInt = ArgType & {
+    _long: string
+}
+
 /**
  * Configures an object from command line arguments
  * @param target - Is the object to configure
@@ -147,56 +200,146 @@ ${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.des
  */
 export const configure = <T>(target: T,
                              args: string[] = process.argv,
+                             env: Record<string, string> = process.env,
                              converters: ConverterMap = CONVERTERS,
                              help: HelpFn = _help): T | undefined | void => {
+
+    const conf = Reflect.getMetadata(configMetadataKey, target.constructor) as ConfigOptions;
+    const resolution: Resolution[] = conf?.resolution || [Resolution.ARG];
+
     const script = args[1];
-    const conf = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
+    const argumentConfsOrig = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
+    const argumentConfs: ArgTypeInt[] = conf?.argPrefix ? argumentConfsOrig.map(v => ({
+        ...v,
+        short: `${conf.argPrefix}-${v.short}`,
+        long: `${conf.argPrefix}-${v.long}`,
+        _long: v.long,
+    })) : argumentConfsOrig.map((v) => ({...v, _long: v.long}));
 
     if (args.includes('-h') || args.includes('--help')) {
-        return help(script, conf);
+        return help(script, argumentConfs);
     }
+    const order = [];
+    order[Resolution.ARG] = (): boolean => {
+        const local = {};
+        for (let i = 2; i < args.length; i++) {
+            const [arg, value] = args[i].split('=', 2);
+            const found = argumentConfs.find(v => {
+                if (arg === `-${v.short}` || arg === `--${v.long}`) {
+                    return true;
+                }
+                return isBoolean(v.type) && arg === `--no-${v.long}`;
+            });
 
-    for (let i = 2; i < args.length; i++) {
-        const [arg, value] = args[i].split('=', 2);
-        const found = conf.find(v => {
+            //Keep found because if a default option is present it will suck up the rest of the values.
+            const c = found || argumentConfs.find(v => v.default);
 
-            if (arg === `-${v.short}` || arg === `--${v.long}`) {
+            if (!c) {
+                help(script, argumentConfs, `Unknown argument '${arg}'`);
                 return true;
             }
-            return isBoolean(v.type) && arg === `--no-${v.long}`;
-        });
-        
-        //Keep found because if a default option is present it will suck up the rest of the values.
-        const c = found || conf.find(v => v.default);
 
-        if (!c) {
-            return help(script, conf, `Unknown argument '${arg}'`);
-        }
+            if (isBoolean(c.type)) {
+                const convert = c.converter || converters.get(c.type) || boolFn;
+                local[c.key] = value != null ? convert(value) : !arg.startsWith('--no-');
+            } else {
+                const convert = c.converter || converters.get(c.type) || strFn;
 
-        const convert = c.converter || converters.get(c.type) || strFn;
-        if (isBoolean(c.type)) {
-            target[c.key] = value != null ? convert(value) : !arg.startsWith('--no-');
-        } else {
-            try {
-                const unparsedValue = value != null ? value : found ? args[++i] : args[i];
-                if (isArrayType(c)) {
-                    target[c.key] = [
-                        ...(target[c.key] || []),
-                        ...(c.converter || converters.get(c.type) || splitFn)(unparsedValue).map(v => (converters.get(arrayType(c)) || strFn)(v))
-                    ];
-                } else {
-                    target[c.key] = convert(unparsedValue);
+                try {
+                    const unparsedValue = value != null ? value : found ? args[++i] : args[i];
+                    if (isArrayType(c)) {
+                        //TODO -- We need to allow
+                        // multiple argument calls --arg 1 --arg 2  == [1,2] while env.ARG=3 should not get pushed on top.
+                        // Depending on order of course.
+                        local[c.key] = [
+                            ...(local[c.key] || []),
+                            ...(c.converter || converters.get(c.type) || splitFn)(unparsedValue).map(v => (converters.get(arrayType(c)) || strFn)(v))
+                        ];
+                    } else {
+                        local[c.key] = convert(unparsedValue);
+                    }
+                } catch (e) {
+                    help(script, argumentConfs, `Converting '${value ?? args[i]}' to type '${niceType(c.type)}' failed\n ${e.message || e}`);
+                    return true;
                 }
-            } catch (e) {
-                return help(script, conf, `Converting '${value ?? args[i]}' to type '${niceType(c.type)}' failed\n ${e.message || e}`);
             }
         }
+        Object.assign(target, local);
+        return false;
+    };
+
+    order[Resolution.ENV] = (): boolean => !!argumentConfs.find((c) => {
+        const key = `${conf?.envPrefix ? conf.envPrefix + '_' : ''}${c._long}`.toUpperCase();
+        if (isBoolean(c.type)) {
+            const negKey = (`NO_${key}` in env);
+            const convert = c.converter || converters.get(c.type) || boolFn;
+            const value = env[`NO_${key}`] ?? env[key];
+            if (negKey || env[key]) {
+                target[c.key] = negKey ? !convert(value) : convert(value);
+            }
+            return false;
+        }
+
+        if (!(key in env)) {
+            return false;
+        }
+
+        const unparsedValue = env[key];
+
+        const convert = c.converter || converters.get(c.type) || strFn;
+
+        try {
+            if (isArrayType(c)) {
+                target[c.key] = (c.converter || converters.get(c.type) || splitFn)(unparsedValue).map(v => (converters.get(arrayType(c)) || strFn)(v));
+            } else {
+                target[c.key] = convert(unparsedValue);
+            }
+        } catch (e) {
+            help(script, argumentConfs, `Converting ENV['${key}'] '${unparsedValue}' to type '${niceType(c.type)}' failed\n ${e.message || e}`);
+            return true;
+        }
+        return false;
+
+    });
+
+    order[Resolution.PACKAGE] = (): boolean => {
+        if (conf.packageKey) {
+
+            let pkg;
+            try {
+                pkg = require.main.require(`./package.json`)[conf.packageKey === true ? conf.prefix : conf.packageKey];
+            } catch (e) {
+                return false;
+            }
+            pkg && argumentConfs.forEach((c) => {
+                if (c._long in pkg) {
+                    target[c.key] = pkg[c._long];
+                }
+            });
+        }
+        return false;
+    };
+
+    order[Resolution.FILE] = (): boolean => {
+        if (conf.rcFile) {
+            const pkg = conf.parser(`.${conf.rcFile}`);
+            pkg && argumentConfs.forEach((c) => {
+                if (c._long in pkg) {
+                    target[c.key] = pkg[c._long];
+                }
+            });
+        }
+        return false;
+    };
+    //The last has highest precedent, so we reverse it and go through it.
+    if (resolution.concat().reverse().find((r) => order[r]()) != null) {
+        return;
     }
 
+    const fail = argumentConfs.find(v => v.required && target[v.key] == null);
 
-    const fail = conf.find(v => v.required && target[v.key] == null);
     if (fail) {
-        return help(script, conf, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
+        return help(script, argumentConfs, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
     }
     return target;
 };

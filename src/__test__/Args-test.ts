@@ -1,10 +1,100 @@
 import {expect} from 'chai';
-import {Arg, configure} from "../index";
+import {Arg, Config, configure} from "../index";
+import {Resolution} from "../types";
 
-const test = (Clazz: any, res: any, ...args: string[]) => expect(configure(new Clazz, ['', 'script', ...args])).to.eql(res);
+const args = (...args: string[]) => ['', 'test', ...args];
+const test = (Clazz: any, res: any, ...rest: string[]) => expect(configure(new Clazz, args(...rest))).to.eql(res);
 
 describe('Args', function () {
+    describe('config', function () {
 
+        it('should configure arg', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, args('--config-what'), {CONFIG_WHAT: '0'});
+            expect(res).to.eql({what: true})
+        });
+
+        it('should configure arg different resolution', function () {
+            @Config({prefix: "config", resolution: [Resolution.ENV, Resolution.ARG]})
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, args('--no-config-what'), {CONFIG_WHAT: '1'});
+            expect(res).to.eql({what: true})
+        });
+        it('should configure arg different resolution reverse', function () {
+            @Config({prefix: "config", resolution: [Resolution.ARG, Resolution.ENV]})
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, args('--no-config-what'), {CONFIG_WHAT: '1'});
+            expect(res).to.eql({what: false})
+        });
+
+        it('should configure env', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, args(), {CONFIG_WHAT: '1'});
+            expect(res).to.eql({what: true})
+        });
+
+        it('should configure negative arg', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, ['', 'test', '--no-config-what'], {what: 'MORE'});
+            expect(res).to.eql({what: false})
+        });
+        it('should configure negative arg env', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '1'});
+            expect(res).to.eql({what: false})
+        });
+
+        it('should configure double negative arg env', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: boolean
+            }
+
+            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '0'});
+            expect(res).to.eql({what: true})
+        });
+
+        it('should configure negative arg', function () {
+            @Config("config")
+            class ConfigIt {
+                @Arg("what")
+                what: number
+            }
+
+            const res = configure(new ConfigIt, ['', 'test', '--config-what=2'], {CONFIG_WHAT: '1'});
+            expect(res).to.eql({what: 2})
+        });
+
+    });
     describe('boolean', function () {
         class Opt {
             @Arg("what")
@@ -96,22 +186,35 @@ describe('Args', function () {
         });
     });
     describe('required', () => {
-        let called = 0;
-        const help = () => {
-            called++
-        };
 
-        class HasRequired {
-            @Arg({required: true})
-            what: string
-        }
 
         it('should error on required', function () {
-            configure(new HasRequired, ['', 'script', 'stuff'], void 0, help);
+            let called = 0;
+            const help = (...args) => {
+                console.log(args);
+                called++
+            };
+
+            class HasRequired {
+                @Arg({required: true})
+                what: string
+            }
+
+            configure(new HasRequired, ['', 'script', 'stuff'], {}, void 0, help);
             expect(called).to.eql(1);
         });
 
         it('should not on required', function () {
+            let called = 0;
+            const help = () => {
+                called++
+            };
+
+            class HasRequired {
+                @Arg({required: true})
+                what: string
+            }
+
             test(HasRequired, {what: 'yes'}, '--what=yes');
         });
 
@@ -214,20 +317,22 @@ describe('Args', function () {
     });
 
     describe('date', function () {
-        class HasDate {
-            @Arg()
-            date: Date;
-        }
+        it('should parse date', () => {
+            class HasDate {
+                @Arg()
+                date: Date;
+            }
 
-        const hd = configure(new HasDate(), ['', '', '--date', '10/10/10']);
-        if (hd) {
-            expect(hd.date.getFullYear()).to.eql(2010);
-            expect(hd.date.getMonth()).to.eql(9);
-            expect(hd.date.getDate()).to.eql(10);
+            const hd = configure(new HasDate(), ['', '', '--date', '10/10/10']);
+            if (hd) {
+                expect(hd.date.getFullYear()).to.eql(2010);
+                expect(hd.date.getMonth()).to.eql(9);
+                expect(hd.date.getDate()).to.eql(10);
 
-        } else {
-            expect(hd).to.exist;
-        }
+            } else {
+                expect(hd).to.exist;
+            }
+        });
     });
 
     describe('errors', function () {
