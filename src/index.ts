@@ -7,7 +7,7 @@
 import chalk from "chalk";
 import * as fs from 'fs';
 import "reflect-metadata";
-import {ArgType, HelpFn, Converter, ConverterMap, ConfigOptions, ParserFn, Resolution} from "./types";
+import {ArgType, HelpFn, Converter, ConverterMap, ConfigOptions, ConfigParserFn, Resolution} from "./types";
 
 const argMetadataKey = Symbol("argMetadataKey");
 const configMetadataKey = Symbol("configMetatdataKey");
@@ -51,15 +51,21 @@ const isBoolean = (v: any): boolean => (v === Boolean || v === 'boolean' || v ==
 
 const RESOLUTION: Resolution[] = [Resolution.ARG, Resolution.ENV, Resolution.FILE, Resolution.PACKAGE];
 
-const addArg = (target: any, conf: ArgType, propertyKey: string | symbol, type: any): ArgType[] => {
-    const arg: ArgType = {
-        key: propertyKey,
-        long: typeof propertyKey === 'symbol' ? conf.long : propertyKey,
-        short: (conf.long || propertyKey)[0],
+const toHyphen = (str: string, sep = '-') => str.replace(/([a-z])?([A-Z])/g, (_, a, b) => ((a == null ? '' : `${a}${sep}`) + b.toLowerCase()));
+
+const addArg = (target: any, conf: ArgType, propertyKey: string | symbol, type: any): ArgTypeInt[] => {
+    const long = conf.long || typeof propertyKey === 'symbol' ? conf.long : propertyKey;
+    const arg: ArgTypeInt = {
+        long,
+        short: long[0],
         type,
-        ...conf
+        ...conf,
+        key: propertyKey,
+        _long: long,
     };
-    const m = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
+
+
+    const m = Reflect.getMetadata(argMetadataKey, target) as ArgTypeInt[];
 
     if (m) {
         const sameLongOrShort = m.find(({long, short}) => long == arg.long || short == arg.short);
@@ -96,7 +102,7 @@ export function Arg(description?: ArgType | string | Converter) {
  * This a decorator for classes to provide env and file support.
  * @param prefix - Either a description a converter or a configuration argument.
  **/
-export function Config(prefix?: ConfigOptions | string | ParserFn) {
+export function Config(prefix?: ConfigOptions | string | ConfigParserFn) {
 
 
     return function (target: any) {
@@ -105,8 +111,8 @@ export function Config(prefix?: ConfigOptions | string | ParserFn) {
             parser: prefix
         } : prefix;
         Reflect.defineMetadata(configMetadataKey, {
-            envPrefix: config.prefix.toUpperCase(),
-            argPrefix: config.prefix,
+            envPrefix: toHyphen(config.prefix, '_').toUpperCase(),
+            argPrefix: toHyphen(config.prefix),
             rcFile: `.${config.prefix.toLowerCase()}rc`,
             packageKey: config.prefix,
             resolution: RESOLUTION,
@@ -177,7 +183,7 @@ const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void 
         message = `${chalk.red('Error')}: ${message}\n\n`
     }
     console.warn(`${message || ''}${script}\nusage: ${_usage(sorted)}
-${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.description || ''} `).join('\n')}
+${sorted.map(v => `  ${v.required ? '*' : ' '} --${toHyphen(v.long)}\t-${v.short}\t${v.description || ''} `).join('\n')}
 
 `);
 
@@ -187,7 +193,7 @@ ${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.des
 type ArgTypeInt = ArgType & {
     _long: string,
 }
-
+type TargetArgFn = (target: any, argumentConfs: ArgTypeInt[]) => boolean;
 /**
  * Configures an object from command line arguments
  * @param target - Is the object to configure
@@ -201,31 +207,22 @@ export const configure = <T>(target: T,
                              converters: ConverterMap = CONVERTERS,
                              help: HelpFn = _help): T | undefined | void => {
 
-    const conf = Reflect.getMetadata(configMetadataKey, target.constructor) as ConfigOptions;
-    const resolution: Resolution[] = conf?.resolution || [Resolution.ARG];
-
     const script = args[1];
-    const argumentConfsOrig = Reflect.getMetadata(argMetadataKey, target) as ArgType[];
-    const argumentConfs: ArgTypeInt[] = conf?.argPrefix ? argumentConfsOrig.map(v => ({
-        ...v,
-        short: `${conf.argPrefix}-${v.short}`,
-        long: `${conf.argPrefix}-${v.long}`,
-        _long: v.long,
-    })) : argumentConfsOrig.map((v) => ({...v, _long: v.long}));
+    const conf = Reflect.getMetadata(configMetadataKey, target.constructor) as ConfigOptions;
+    const resolution: Resolution[] = conf?.resolution?.concat().reverse() ?? [Resolution.ARG];
 
-    if (args.includes('-h') || args.includes('--help')) {
-        return help(script, argumentConfs);
-    }
-    const order = [];
-    order[Resolution.ARG] = (): boolean => {
+    const order = Array<TargetArgFn>();
+
+    order[Resolution.ARG] = (target, argumentConfs): boolean => {
         const local = {};
         for (let i = 2; i < args.length; i++) {
             const [arg, value] = args[i].split('=', 2);
             const found = argumentConfs.find(v => {
-                if (arg === `-${v.short}` || arg === `--${v.long}`) {
+                const long = toHyphen(v.long);
+                if (arg === `-${v.short}` || arg === `--${long}`) {
                     return true;
                 }
-                return isBoolean(v.type) && arg === `--no-${v.long}`;
+                return isBoolean(v.type) && arg === `--no-${long}`;
             });
 
             //Keep found because if a default option is present it will suck up the rest of the values.
@@ -265,13 +262,13 @@ export const configure = <T>(target: T,
         return false;
     };
 
-    order[Resolution.ENV] = (): boolean => !!argumentConfs.find((c) => {
-        const key = `${conf?.envPrefix ? conf.envPrefix + '_' : ''}${c._long}`.toUpperCase();
+    order[Resolution.ENV] = (target, argumentConfs): boolean => !!argumentConfs.find((c) => {
+        const key = `${conf?.envPrefix ? conf.envPrefix + '_' : ''}${toHyphen(c._long, '_')}`.toUpperCase();
         if (isBoolean(c.type)) {
             const negKey = (`NO_${key}` in env);
-            const convert = c.converter || converters.get(c.type) || boolFn;
-            const value = env[`NO_${key}`] ?? env[key];
-            if (negKey || env[key]) {
+            const value = negKey ? env[`NO_${key}`] : env[key];
+            if (value != null) {
+                const convert = c.converter || converters.get(c.type) || boolFn;
                 target[c.key] = negKey ? !convert(value) : convert(value);
             }
             return false;
@@ -299,7 +296,7 @@ export const configure = <T>(target: T,
 
     });
 
-    order[Resolution.PACKAGE] = (): boolean => {
+    order[Resolution.PACKAGE] = (target, argumentConfs): boolean => {
         if (conf.packageKey) {
 
             let pkg;
@@ -317,7 +314,7 @@ export const configure = <T>(target: T,
         return false;
     };
 
-    order[Resolution.FILE] = (): boolean => {
+    order[Resolution.FILE] = (target, argumentConfs): boolean => {
         if (conf.rcFile) {
             const pkg = conf.parser(conf.rcFile);
             pkg && argumentConfs.forEach((c) => {
@@ -328,15 +325,28 @@ export const configure = <T>(target: T,
         }
         return false;
     };
-    //The last has highest precedent, so we reverse it and go through it.
-    if (resolution.concat().reverse().find((r) => order[r]()) != null) {
-        return;
-    }
 
-    const fail = argumentConfs.find(v => v.required && target[v.key] == null);
+    const _configure = (target: T, parent?: string): T | undefined => {
+        const argumentConfs: ArgTypeInt[] = ((args = Reflect.getMetadata(argMetadataKey, target)) => parent ?
+            args.map(v => ({...v, short: `${parent}-${v.short}`, long: `${parent}-${v.long}`})) : args)();
 
-    if (fail) {
-        return help(script, argumentConfs, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
-    }
-    return target;
+        if (args.includes('-h') || args.includes('--help')) {
+            help(script, argumentConfs);
+            return;
+        }
+
+        //The last has highest precedent, so we reverse it and go through it.
+        if (resolution.find((r) => order[r](target, argumentConfs)) != null) {
+            return;
+        }
+
+        const fail = argumentConfs.find(v => v.required && target[v.key] == null);
+
+        if (fail) {
+            help(script, argumentConfs, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
+            return;
+        }
+        return target;
+    };
+    return _configure(target, conf?.argPrefix);
 };

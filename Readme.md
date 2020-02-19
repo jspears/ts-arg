@@ -49,3 +49,71 @@ If it doesn't quite do what you want checkout the possible options.
     converter?: Converter,
     itemType?: 'Boolean' | 'String' | 'Number' | 'Int' | 'JSON' | any,
 ```
+
+### Application Style
+Sometimes storing the parameters is desired, by labeling your class with
+the `@Config` decorator, a few things happen.
+
+- All commands are prefixed with the "argPrefix" value which defaults to the "prefix" value which itself defaults to className.
+- ENV parameters are enabled allowing ENV properties to be read with the correct prefix.  Similar to the
+  `argPerfix` the `envPrefix` defaults to the `prefix` and then to the class name.
+- A configuration file is looked for, by default a JSON file (parser is specfiable).  The rcFile variable
+   is defaulted to the `.${prefix}`. value.
+- A property named `packagePrefix` which defaults to `prefix` is read from the current project's 
+  package.json and attempts to set the current project. 
+  
+Example:
+
+```ts 
+#!/usr/bin/env node
+
+import {configure, Config, Arg} from 'ts-arg';
+
+@Config("myapp")
+class MyOptions {
+  @Arg("verbosity on/off")
+  verbose:boolean;
+
+  @Arg({description:"Paths to look for", default:true})
+  paths:string[]
+
+  @Arg()
+  name:string;
+ 
+}
+console.table(configure(new MyOption));
+
+
+```  
+       
+Then options can be provided via cli:
+```sh
+ $ ./bin/myapp.js --myapp-name=stuff -v ./path/to/thing.
+```
+or they can be combined with ENV
+```sh
+ $ MY_APP_VERSBOSE=1 ./bin/myapp.js --myapp-name=stuff ./path/to/thing.
+```
+and it could be combined with `package.json`
+```json
+
+{
+"name": "my-super-app",
+"myapp": {
+    "name": "stuff"
+  }
+}
+
+```
+Or a dot file `.myapprc`
+```json
+{
+   "paths": ["./src","./test"],
+ "verbose": true,
+}
+
+
+```
+
+
+

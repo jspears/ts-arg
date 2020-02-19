@@ -1,3 +1,6 @@
+/**
+ * Represents what order to resolve the arguments.
+ */
 export enum Resolution {
     ARG,
     ENV,
@@ -5,21 +8,46 @@ export enum Resolution {
     PACKAGE,
 }
 
-export type ParserFn = (path: string) => any;
-
+/**
+ * This function parses a file at a path and returns
+ * a value
+ */
+export type ConfigParserFn = (path: string) => any;
+/**
+ * Configuration options for the `@Config` decorator
+ */
 export type ConfigOptions = {
-    prefix?: string,
-    rcFile?: string,
-    argPrefix?: string,
-    envPrefix?: string,
-    packageKey?: string,
-    description?: string,
     /**
-     * The order to resolve options.
+     * Default prefix to use for all other prefix's.
+     */
+    prefix?: string,
+    /**
+     * The name of the desired rcFile defaults to `.${prefix}rc`
+     */
+    rcFile?: string,
+    /**
+     * The name of the desired argument prefix.  Defaults to `${prefix}-
+     */
+    argPrefix?: string,
+    /**
+     * The name of the desired ENV prefix.  Defaults to uppercase `prefix`
+     */
+    envPrefix?: string,
+    /**
+     * The name of the package.json key to find configuration information.
+     * Defaults to `prefix`
+     */
+    packageKey?: string,
+    /**
+     * The order to resolve options.  Defaults to the following order
+     * `ARG`, `ENV`, `File`, `package.json`
      */
     resolution?: [Resolution, Resolution?, Resolution?, Resolution?]
-    checkHomeDir?: boolean,
-    parser?: ParserFn,
+    /**
+     * Parser to use to parse the rc file.  Currently its just
+     * (filename)=>JSON.parse(fs.readFileSync(filename));
+     */
+    parser?: ConfigParserFn,
 }
 
 /**

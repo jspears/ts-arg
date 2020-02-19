@@ -1,112 +1,10 @@
 import {expect} from 'chai';
-import {Arg, Config, configure} from "../index";
-import {Resolution} from "../types";
+import {Arg, configure} from "../index";
 
 const args = (...args: string[]) => ['', 'test', ...args];
 const test = (Clazz: any, res: any, ...rest: string[]) => expect(configure(new Clazz, args(...rest))).to.eql(res);
 
-describe('Args', function () {
-    describe('config', function () {
-
-        it('should configure arg', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, args('--config-what'), {CONFIG_WHAT: '0'});
-            expect(res).to.eql({what: true})
-        });
-
-        it('should configure arg different resolution', function () {
-            @Config({prefix: "config", resolution: [Resolution.ENV, Resolution.ARG]})
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, args('--no-config-what'), {CONFIG_WHAT: '1'});
-            expect(res).to.eql({what: true})
-        });
-        it('should configure arg different resolution reverse', function () {
-            @Config({prefix: "config", resolution: [Resolution.ARG, Resolution.ENV]})
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, args('--no-config-what'), {CONFIG_WHAT: '1'});
-            expect(res).to.eql({what: false})
-        });
-
-        it('should configure env', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, args(), {CONFIG_WHAT: '1'});
-            expect(res).to.eql({what: true})
-        });
-
-        it('should configure negative arg', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, ['', 'test', '--no-config-what'], {what: 'MORE'});
-            expect(res).to.eql({what: false})
-        });
-        it('should configure negative arg env', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '1'});
-            expect(res).to.eql({what: false})
-        });
-
-        it('should configure double negative arg env', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: boolean
-            }
-
-            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '0'});
-            expect(res).to.eql({what: true})
-        });
-
-        it('should configure negative arg', function () {
-            @Config("config")
-            class ConfigIt {
-                @Arg("what")
-                what: number
-            }
-
-            const res = configure(new ConfigIt, ['', 'test', '--config-what=2'], {CONFIG_WHAT: '1'});
-            expect(res).to.eql({what: 2})
-        });
-
-        it('should work with a custom parser', function () {
-
-            @Config((what)=>({what}))
-            class ConfigIt {
-                @Arg("what")
-                what: string
-            }
-
-            const res = configure(new ConfigIt, args());
-            expect(res).to.eql({what: '.configitrc'})
-        });
-
-    });
+describe('@Arg', function () {
     describe('boolean', function () {
         class Opt {
             @Arg("what")
@@ -129,6 +27,31 @@ describe('Args', function () {
         it('should set option to =false', function () {
             test(Opt, {what: false}, '--what=false');
         });
+        it('should work with camelCase no arg', function () {
+            class Camel {
+                @Arg()
+                hasCamel: boolean;
+            }
+
+            test(Camel, {hasCamel: true}, '--has-camel');
+        });
+        it('should work with camelCase =true', function () {
+            class Camel {
+                @Arg()
+                hasCamel: boolean;
+            }
+
+            test(Camel, {hasCamel: true}, '--has-camel=true');
+        });
+        it('should work with camelCase =false', function () {
+            class Camel {
+                @Arg()
+                hasCamel: boolean;
+            }
+
+            test(Camel, {hasCamel: false}, '--has-camel=false');
+        });
+
     });
     describe('string', function () {
         class Opt {
@@ -202,8 +125,7 @@ describe('Args', function () {
 
         it('should error on required', function () {
             let called = 0;
-            const help = (...args) => {
-                console.log(args);
+            const help = () => {
                 called++
             };
 
@@ -419,9 +341,11 @@ describe('Args', function () {
                 "help-script\nusage: -ow\n    --on\t-o\twon \n    --what\t-w\twhat \n\n"
             ]])
         });
+
         it('should --help', function () {
             expect(configure(new Help, ['', 'help-script', '--help'])).to.not.exist;
         });
+
         it('should error', function () {
             class HasError {
                 @Arg((more) => {
