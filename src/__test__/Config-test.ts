@@ -134,7 +134,7 @@ describe('@Config', function () {
         let orequire;
         beforeEach(() => {
             orequire = require.main.require;
-            require.main.require = Object.assign(() => ({name: 'test', tester: {whatThe: 'heel'}}), orequire);
+            require.main.require = Object.assign((name) => ({name, tester: {whatThe: 'heel'}}), orequire);
         });
 
         afterEach(() => {

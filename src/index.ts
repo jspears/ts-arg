@@ -254,8 +254,8 @@ export const configure = <T>(target: T,
                 if (value == null) {
                     local[c.key] = !isNeg;
                 } else {
-                    const convert = converter(c, boolFn);
-                    local[c.key] = isNeg ? !convert(value) : convert(value);
+                    const cValue = converter(c, boolFn)(value);
+                    local[c.key] = isNeg ? !cValue : cValue;
                 }
             } else {
                 const convert = converter(c, strFn);
@@ -268,7 +268,7 @@ export const configure = <T>(target: T,
                         // Depending on order of course.
                         local[c.key] = [
                             ...(local[c.key] || []),
-                            ...(converter(c, splitFn)(unparsedValue).map(v => converter(arrayType(c), strFn)(v)))
+                            ...converter(c, splitFn)(unparsedValue).map(converter(arrayType(c), strFn))
                         ];
                     } else {
                         local[c.key] = convert(unparsedValue);
@@ -303,7 +303,7 @@ export const configure = <T>(target: T,
 
         try {
             if (isArrayType(c)) {
-                target[c.key] = (converter(c, splitFn))(unparsedValue).map(v => converter(arrayType(c), strFn)(v));
+                target[c.key] = converter(c, splitFn)(unparsedValue).map(converter(arrayType(c), strFn));
             } else {
                 target[c.key] = converter(c, strFn)(unparsedValue);
             }
