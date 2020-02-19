@@ -113,6 +113,60 @@
     <span class="hljs-keyword">type</span>?: <span class="hljs-string">'Boolean'</span> | <span class="hljs-string">'String'</span> | <span class="hljs-string">'Number'</span> | <span class="hljs-string">'Int'</span> | <span class="hljs-string">'JSON'</span> | <span class="hljs-string">'[]'</span> | <span class="hljs-built_in">any</span>,
     converter?: Converter,
     itemType?: <span class="hljs-string">'Boolean'</span> | <span class="hljs-string">'String'</span> | <span class="hljs-string">'Number'</span> | <span class="hljs-string">'Int'</span> | <span class="hljs-string">'JSON'</span> | <span class="hljs-built_in">any</span>,</code></pre>
+				<a href="#application-style" id="application-style" style="color: inherit; text-decoration: none;">
+					<h3>Application Style</h3>
+				</a>
+				<p>Sometimes storing the parameters is desired, by labeling your class with
+				the <code>@Config</code> decorator, a few things happen.</p>
+				<ul>
+					<li>All commands are prefixed with the &quot;argPrefix&quot; value which defaults to the &quot;prefix&quot; value which itself defaults to className.</li>
+					<li>ENV parameters are enabled allowing ENV properties to be read with the correct prefix.  Similar to the
+					<code>argPerfix</code> the <code>envPrefix</code> defaults to the <code>prefix</code> and then to the class name.</li>
+					<li>A configuration file is looked for, by default a JSON file (parser is specfiable).  The rcFile variable
+					is defaulted to the <code>.${prefix}</code>. value.</li>
+					<li>A property named <code>packagePrefix</code> which defaults to <code>prefix</code> is read from the current project&#39;s
+					package.json and attempts to set the current project. </li>
+				</ul>
+				<p>Example:</p>
+				<pre><code class="language-ts">#!<span class="hljs-regexp">/usr/</span>bin/env node
+
+<span class="hljs-keyword">import</span> {configure, Config, Arg} <span class="hljs-keyword">from</span> <span class="hljs-string">'ts-arg'</span>;
+
+<span class="hljs-meta">@Config</span>(<span class="hljs-string">"myapp"</span>)
+<span class="hljs-keyword">class</span> MyOptions {
+  <span class="hljs-meta">@Arg</span>(<span class="hljs-string">"verbosity on/off"</span>)
+  verbose:<span class="hljs-built_in">boolean</span>;
+
+  <span class="hljs-meta">@Arg</span>({description:<span class="hljs-string">"Paths to look for"</span>, <span class="hljs-keyword">default</span>:<span class="hljs-literal">true</span>})
+  paths:<span class="hljs-built_in">string</span>[]
+
+  <span class="hljs-meta">@Arg</span>()
+  name:<span class="hljs-built_in">string</span>;
+
+}
+<span class="hljs-built_in">console</span>.table(configure(<span class="hljs-keyword">new</span> MyOption));
+
+</code></pre>
+				<p>Then options can be provided via cli:</p>
+				<pre><code class="language-sh"> $ ./bin/myapp.js --myapp-name=stuff -v ./path/to/thing.</code></pre>
+				<p>or they can be combined with ENV</p>
+				<pre><code class="language-sh"> $ MY_APP_VERSBOSE=1 ./bin/myapp.js --myapp-name=stuff ./path/to/thing.</code></pre>
+				<p>and it could be combined with <code>package.json</code></p>
+				<pre><code class="language-json">
+{
+<span class="hljs-attr">"name"</span>: <span class="hljs-string">"my-super-app"</span>,
+<span class="hljs-attr">"myapp"</span>: {
+    <span class="hljs-attr">"name"</span>: <span class="hljs-string">"stuff"</span>
+  }
+}
+</code></pre>
+				<p>Or a dot file <code>.myapprc</code></p>
+				<pre><code class="language-json">{
+   <span class="hljs-attr">"paths"</span>: [<span class="hljs-string">"./src"</span>,<span class="hljs-string">"./test"</span>],
+ <span class="hljs-attr">"verbose"</span>: <span class="hljs-literal">true</span>,
+}
+
+</code></pre>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

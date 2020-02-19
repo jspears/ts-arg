@@ -174,23 +174,6 @@ export const CONVERTERS = new Map<any, Converter>([
     [RegExp, regexFn]
 ]);
 
-const resolveConverter = (converters: Map<any, Converter> = CONVERTERS): ConverterResolveFn => (c, def): Converter => {
-
-    if ('converter' in c) {
-        return c.converter;
-    }
-
-    if ('type' in c) {
-        if (converters.has(c.type)) {
-            return converters.get(c.type);
-        }
-        if (typeof c.type === 'function') {
-            return (v) => new c.type(v);
-        }
-    }
-
-    return def ?? ((v) => v);
-};
 
 const _usage = (conf: ArgType[]): string => {
     const shorts = conf.filter(v => !v.default).map(v => v.short).join('');
@@ -226,7 +209,7 @@ ${sorted.map(v => `  ${v.required ? '*' : ' '} --${toHyphen(v.long)}\t-${v.short
 type ArgTypeInt = ArgType & {
     _long: string,
 }
-type TargetArgFn = (target: any, argumentConfs: ArgTypeInt[]) => boolean;
+type TargetArgFn = (target: any, argumentConfs: ArgTypeInt[], resolve: ConverterResolveFn) => boolean;
 /**
  * Configures an object from command line arguments
  * @param target - Is the object to configure
@@ -240,14 +223,13 @@ export const configure = <T>(target: T,
                              env: Record<string, string> = process.env,
                              converters: ConverterMap | ConverterResolveFn = CONVERTERS,
                              help: HelpFn = _help): T | undefined => {
-    const converter = typeof converters == 'function' ? converters : resolveConverter(converters);
     const script = args[1];
     const conf = Reflect.getMetadata(configMetadataKey, target.constructor) as ConfigOptions;
     const resolution: Resolution[] = conf?.resolution?.concat().reverse() ?? [Resolution.ARG];
-
+    const resolver = typeof converters === 'function' ? converters : (v: ArgTypeInt) => converters.get(v.type);
     const order = Array<TargetArgFn>();
 
-    order[Resolution.ARG] = (target, argumentConfs): boolean => {
+    order[Resolution.ARG] = (target, argumentConfs, converter): boolean => {
         const local = {};
         for (let i = 2; i < args.length; i++) {
             const [arg, value] = args[i].split('=', 2);
@@ -301,7 +283,7 @@ export const configure = <T>(target: T,
         return false;
     };
 
-    order[Resolution.ENV] = (target, argumentConfs): boolean => !!argumentConfs.find((c) => {
+    order[Resolution.ENV] = (target, argumentConfs, converter): boolean => !!argumentConfs.find((c) => {
         const key = `${conf?.envPrefix ? conf.envPrefix + '_' : ''}${toHyphen(c._long, '_')}`.toUpperCase();
         if (isBoolean(c.type)) {
             const negKey = (`NO_${key}` in env);
@@ -332,7 +314,7 @@ export const configure = <T>(target: T,
         return false;
     });
 
-    order[Resolution.PACKAGE] = (target, argumentConfs): boolean => {
+    order[Resolution.PACKAGE] = (target, argumentConfs, converter): boolean => {
         if (conf.packageKey) {
 
             let pkg;
@@ -350,7 +332,7 @@ export const configure = <T>(target: T,
         return false;
     };
 
-    order[Resolution.FILE] = (target, argumentConfs): boolean => {
+    order[Resolution.FILE] = (target, argumentConfs, converter): boolean => {
         if (conf.rcFile) {
             const pkg = conf.parser(conf.rcFile);
             pkg && argumentConfs.forEach((c) => {
@@ -363,8 +345,28 @@ export const configure = <T>(target: T,
     };
 
     const _configure = (target: T, parent?: string): T | undefined => {
-        const argTypes: ArgTypeInt[] = ((args = Reflect.getMetadata(argMetadataKey, target)) => parent ?
-            args.map(v => ({...v, short: `${parent}-${v.short}`, long: `${parent}-${v.long}`})) : args)();
+        const argTypes: ArgTypeInt[] = ((args: ArgTypeInt[] = []) => parent ?
+            args.map(v => ({
+                ...v,
+                short: `${parent}-${v.short}`,
+                long: `${parent}-${v.long}`
+            })) : args)(Reflect.getMetadata(argMetadataKey, target));
+
+        const converter: ConverterResolveFn = (c: ArgTypeInt, def = v => v) => {
+
+            if ('converter' in c) {
+                return c.converter;
+            }
+
+            if ('type' in c) {
+                const r = resolver(c);
+                if (r != null) {
+                    return r;
+                }
+            }
+
+            return def;
+        };
 
         if (args.includes('-h') || args.includes('--help')) {
             help(script, argTypes);
@@ -372,7 +374,7 @@ export const configure = <T>(target: T,
         }
 
         //The last has highest precedent, so we reverse it and go through it.
-        if (resolution.find((r) => order[r](target, argTypes)) != null) {
+        if (resolution.find((r) => order[r](target, argTypes, converter)) != null) {
             return;
         }
 

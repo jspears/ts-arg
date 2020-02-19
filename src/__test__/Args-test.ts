@@ -134,7 +134,7 @@ describe('@Arg', function () {
                 what: string
             }
 
-            configure(new HasRequired, ['', 'script', 'stuff'], {}, void 0, help);
+            configure(new HasRequired, args('stuff'), {}, void 0, help);
             expect(called).to.eql(1);
         });
 
@@ -149,7 +149,8 @@ describe('@Arg', function () {
                 what: string
             }
 
-            test(HasRequired, {what: 'yes'}, '--what=yes');
+            configure(new HasRequired, args(), {}, void 0, help);
+            expect(called).to.eql(1);
         });
 
     });
@@ -362,5 +363,28 @@ describe('@Arg', function () {
             expect(warn[0][0]).to.contains("Converting 'more' to type 'string' failed\n Error more\n\nhelp-script\nusage: -s\n    --stuff\t-s\t \n\n");
 
         })
-    })
+    });
+    describe("symbol", function () {
+        it('should work with symbols', function () {
+            const key = Symbol('test');
+
+            class HasSymbol {
+                @Arg({long: 'test'})
+                [key]: string
+            }
+
+            test(HasSymbol, {[key]: 'what'}, '--test', 'what');
+        })
+    });
+    describe("Int", function () {
+        it('should work with int', function () {
+
+            class HasInt {
+                @Arg({type: 'Int'})
+                test: number;
+            }
+
+            test(HasInt, {test: 1}, '--test', '1.1');
+        })
+    });
 });

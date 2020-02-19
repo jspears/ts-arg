@@ -93,7 +93,7 @@
 					<div class="tsd-signature tsd-kind-icon">CONVERTERS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">(</span>v<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map&lt;any, Converter&gt;([[&#x27;Int&#x27;, v &#x3D;&gt; parseInt(v, 10)],[&#x27;Number&#x27;, parseFloat],[&#x27;number&#x27;, parseFloat],[&#x27;Boolean&#x27;, boolFn],[&#x27;boolean&#x27;, boolFn],[&#x27;String&#x27;, strFn],[&#x27;string&#x27;, strFn],[&#x27;JSON&#x27;, jsonFn],[&#x27;Date&#x27;, dateFn],[&#x27;[]&#x27;, splitFn],[&#x27;Array&#x27;, splitFn],[&#x27;RegExp&#x27;, regexFn],[Number, parseFloat],[String, strFn],[Boolean, boolFn],[Date, dateFn],[Array, splitFn],[RegExp, regexFn]])</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/1b991cb/src/index.ts#L136">index.ts:136</a></li>
+							<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/c749ee7/src/index.ts#L156">index.ts:156</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -110,7 +110,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/1b991cb/src/index.ts#L87">index.ts:87</a></li>
+									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/c749ee7/src/index.ts#L104">index.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -135,13 +135,13 @@
 					<a name="config" class="tsd-anchor"></a>
 					<h3>Config</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">Config<span class="tsd-signature-symbol">(</span>prefix<span class="tsd-signature-symbol">?: </span><a href="_types_.html#configoptions" class="tsd-signature-type">ConfigOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#parserfn" class="tsd-signature-type">ParserFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
+						<li class="tsd-signature tsd-kind-icon">Config<span class="tsd-signature-symbol">(</span>prefix<span class="tsd-signature-symbol">?: </span><a href="_types_.html#configoptions" class="tsd-signature-type">ConfigOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#configparserfn" class="tsd-signature-type">ConfigParserFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/1b991cb/src/index.ts#L99">index.ts:99</a></li>
+									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/c749ee7/src/index.ts#L119">index.ts:119</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -152,7 +152,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> prefix: <a href="_types_.html#configoptions" class="tsd-signature-type">ConfigOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#parserfn" class="tsd-signature-type">ParserFn</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> prefix: <a href="_types_.html#configoptions" class="tsd-signature-type">ConfigOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="_types_.html#configparserfn" class="tsd-signature-type">ConfigParserFn</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Either a description a converter or a configuration argument.</p>
 									</div>
@@ -166,13 +166,13 @@
 					<a name="configure" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> configure</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">configure&lt;T&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, env<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span>, converters<span class="tsd-signature-symbol">?: </span><a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a>, help<span class="tsd-signature-symbol">?: </span><a href="_types_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">configure&lt;T&gt;<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, env<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span>, converters<span class="tsd-signature-symbol">?: </span><a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a><span class="tsd-signature-symbol"> | </span><a href="_types_.html#converterresolvefn" class="tsd-signature-type">ConverterResolveFn</a>, help<span class="tsd-signature-symbol">?: </span><a href="_types_.html#helpfn" class="tsd-signature-type">HelpFn</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/1b991cb/src/index.ts#L198">index.ts:198</a></li>
+									<li>Defined in <a href="https://github.com/jspears/ts-arg/blob/c749ee7/src/index.ts#L238">index.ts:238</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -206,12 +206,17 @@
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> env: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = process.env</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> converters: <a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a><span class="tsd-signature-symbol"> = CONVERTERS</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<div class="lead">
-											<p>A Map of converters that take a string and return a value.</p>
+											<p><code>process.env</code> or your very own env.</p>
+										</div>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> converters: <a href="_types_.html#convertermap" class="tsd-signature-type">ConverterMap</a><span class="tsd-signature-symbol"> | </span><a href="_types_.html#converterresolvefn" class="tsd-signature-type">ConverterResolveFn</a><span class="tsd-signature-symbol"> = CONVERTERS</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>A Map of converters that take a string and return a value or a function that returns converters.</p>
 										</div>
 									</div>
 								</li>
@@ -224,7 +229,7 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h4>
 						</li>
 					</ul>
 				</section>
