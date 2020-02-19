@@ -7,15 +7,26 @@
 import chalk from "chalk";
 import * as fs from 'fs';
 import "reflect-metadata";
-import {ArgType, HelpFn, Converter, ConverterMap, ConfigOptions, ConfigParserFn, Resolution} from "./types";
+import {
+    ArgType,
+    HelpFn,
+    Converter,
+    ConverterMap,
+    ConfigOptions,
+    ConfigParserFn,
+    Resolution,
+    ConverterResolveFn
+} from "./types";
 
 const argMetadataKey = Symbol("argMetadataKey");
 const configMetadataKey = Symbol("configMetatdataKey");
 
 const isArrayType = (v: ArgType) => v.itemType != null || v.type === Array || (typeof v.type == 'string' && v.type.endsWith('[]'));
 
-const arrayType = (v: ArgType): string | any => v.itemType != null ? v.itemType : typeof v.type === 'string'
-    ? v.type.replace(/\[\]$/, '') || 'string' : 'string';
+const arrayType = (v: ArgType): string | any => ({
+    type: v.itemType != null ? v.itemType : typeof v.type === 'string'
+        ? v.type.replace(/\[\]$/, '') || 'string' : 'string'
+});
 
 const _niceType = (type: any): string => {
     if (isBoolean(type)) {
@@ -53,8 +64,8 @@ const RESOLUTION: Resolution[] = [Resolution.ARG, Resolution.ENV, Resolution.FIL
 
 const toHyphen = (str: string, sep = '-') => str.replace(/([a-z])?([A-Z])/g, (_, a, b) => ((a == null ? '' : `${a}${sep}`) + b.toLowerCase()));
 
-const addArg = (target: any, conf: ArgType, propertyKey: string | symbol, type: any): ArgTypeInt[] => {
-    const long = conf.long || typeof propertyKey === 'symbol' ? conf.long : propertyKey;
+const addArg = (target: any, conf: ArgType, propertyKey: string | symbol | number, type: any): ArgTypeInt[] => {
+    const long = conf.long || typeof propertyKey === 'symbol' ? conf.long : propertyKey + '';
     const arg: ArgTypeInt = {
         long,
         short: long[0],
@@ -94,7 +105,10 @@ export function Arg(description?: ArgType | string | Converter) {
     const conf = description == null ? {} : typeof description === 'string' ? {description} : typeof description == 'function' ? {converter: description} : description;
 
     return function (target: any, propertyKey?: string | symbol) {
-        addArg(target, conf, propertyKey, Reflect.getMetadata("design:type", target, propertyKey));
+        if (propertyKey == null && conf.key == null) {
+            throw new Error('A property key is required, when using on Class target');
+        }
+        addArg(target, conf, propertyKey ?? conf.key, Reflect.getMetadata("design:type", target, propertyKey));
     }
 }
 
@@ -159,6 +173,25 @@ export const CONVERTERS = new Map<any, Converter>([
     [Array, splitFn],
     [RegExp, regexFn]
 ]);
+
+const resolveConverter = (converters: Map<any, Converter> = CONVERTERS): ConverterResolveFn => (c, def): Converter => {
+
+    if ('converter' in c) {
+        return c.converter;
+    }
+
+    if ('type' in c) {
+        if (converters.has(c.type)) {
+            return converters.get(c.type);
+        }
+        if (typeof c.type === 'function') {
+            return (v) => new c.type(v);
+        }
+    }
+
+    return def ?? ((v) => v);
+};
+
 const _usage = (conf: ArgType[]): string => {
     const shorts = conf.filter(v => !v.default).map(v => v.short).join('');
     const def = conf.find(v => v.default);
@@ -198,15 +231,16 @@ type TargetArgFn = (target: any, argumentConfs: ArgTypeInt[]) => boolean;
  * Configures an object from command line arguments
  * @param target - Is the object to configure
  * @param args - `process.argv` or your own array of strings.
- * @param converters - A Map of converters that take a string and return a value.
+ * @param env - `process.env` or your very own env.
+ * @param converters - A Map of converters that take a string and return a value or a function that returns converters.
  * @param help - A function for help, this one call on invocation, you may not want that.
  */
 export const configure = <T>(target: T,
                              args: string[] = process.argv,
                              env: Record<string, string> = process.env,
-                             converters: ConverterMap = CONVERTERS,
-                             help: HelpFn = _help): T | undefined | void => {
-
+                             converters: ConverterMap | ConverterResolveFn = CONVERTERS,
+                             help: HelpFn = _help): T | undefined => {
+    const converter = typeof converters == 'function' ? converters : resolveConverter(converters);
     const script = args[1];
     const conf = Reflect.getMetadata(configMetadataKey, target.constructor) as ConfigOptions;
     const resolution: Resolution[] = conf?.resolution?.concat().reverse() ?? [Resolution.ARG];
@@ -238,21 +272,21 @@ export const configure = <T>(target: T,
                 if (value == null) {
                     local[c.key] = !isNeg;
                 } else {
-                    const convert = c.converter || converters.get(c.type) || boolFn;
+                    const convert = converter(c, boolFn);
                     local[c.key] = isNeg ? !convert(value) : convert(value);
                 }
             } else {
-                const convert = c.converter || converters.get(c.type) || strFn;
+                const convert = converter(c, strFn);
 
                 try {
                     const unparsedValue = value != null ? value : found ? args[++i] : args[i];
                     if (isArrayType(c)) {
-                        //TODO -- We need to allow
+                        // We allow
                         // multiple argument calls --arg 1 --arg 2  == [1,2] while env.ARG=3 should not get pushed on top.
                         // Depending on order of course.
                         local[c.key] = [
                             ...(local[c.key] || []),
-                            ...(c.converter || converters.get(c.type) || splitFn)(unparsedValue).map(v => (converters.get(arrayType(c)) || strFn)(v))
+                            ...(converter(c, splitFn)(unparsedValue).map(v => converter(arrayType(c), strFn)(v)))
                         ];
                     } else {
                         local[c.key] = convert(unparsedValue);
@@ -273,7 +307,7 @@ export const configure = <T>(target: T,
             const negKey = (`NO_${key}` in env);
             const value = negKey ? env[`NO_${key}`] : env[key];
             if (value != null) {
-                const convert = c.converter || converters.get(c.type) || boolFn;
+                const convert = converter(c, boolFn);
                 target[c.key] = negKey ? !convert(value) : convert(value);
             }
             return false;
@@ -285,20 +319,17 @@ export const configure = <T>(target: T,
 
         const unparsedValue = env[key];
 
-        const convert = c.converter || converters.get(c.type) || strFn;
-
         try {
             if (isArrayType(c)) {
-                target[c.key] = (c.converter || converters.get(c.type) || splitFn)(unparsedValue).map(v => (converters.get(arrayType(c)) || strFn)(v));
+                target[c.key] = (converter(c, splitFn))(unparsedValue).map(v => converter(arrayType(c), strFn)(v));
             } else {
-                target[c.key] = convert(unparsedValue);
+                target[c.key] = converter(c, strFn)(unparsedValue);
             }
         } catch (e) {
             help(script, argumentConfs, `Converting ENV['${key}'] '${unparsedValue}' to type '${niceType(c.type)}' failed\n ${e.message || e}`);
             return true;
         }
         return false;
-
     });
 
     order[Resolution.PACKAGE] = (target, argumentConfs): boolean => {
@@ -348,7 +379,7 @@ export const configure = <T>(target: T,
         const fail = argTypes.find(v => v.required && target[v.key] == null);
 
         if (fail) {
-            help(script, argTypes, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
+            help(script, argTypes, `Required argument '${fail.long}' was not supplied.`);
             return;
         }
         return target;

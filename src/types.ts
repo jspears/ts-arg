@@ -58,6 +58,19 @@ export type Converter = (v: string) => any;
  * A map that allows for lookups of converters.
  */
 export type ConverterMap = Map<any, Converter>;
+
+export type HasConverter = {
+    converter: Converter
+}
+export type HasType = {
+    type?: any
+}
+/**
+ * A function that can be used for converting, from
+ * one string to a type.
+ */
+export type ConverterResolveFn = (v: HasConverter | HasType, def?: Converter) => Converter;
+
 /**
  * A configuration object for the `@Arg` decorator.
  */
