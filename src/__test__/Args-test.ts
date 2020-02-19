@@ -94,6 +94,18 @@ describe('Args', function () {
             expect(res).to.eql({what: 2})
         });
 
+        it('should work with a custom parser', function () {
+
+            @Config((what)=>({what}))
+            class ConfigIt {
+                @Arg("what")
+                what: string
+            }
+
+            const res = configure(new ConfigIt, args());
+            expect(res).to.eql({what: '.configitrc'})
+        });
+
     });
     describe('boolean', function () {
         class Opt {
@@ -332,6 +344,26 @@ describe('Args', function () {
             } else {
                 expect(hd).to.exist;
             }
+        });
+    });
+    describe('regex', function () {
+        it('should parse regex', () => {
+            class HasRegex {
+                @Arg()
+                regex: RegExp;
+            }
+
+            const hd = configure(new HasRegex(), args('--regex=/.+?/'));
+            expect(hd).to.eql({regex: /.+?/});
+        });
+        it('should parse regex with flags', () => {
+            class HasRegex {
+                @Arg()
+                regex: RegExp;
+            }
+
+            const hd = configure(new HasRegex(), args('--regex=/.+?/i'));
+            expect(hd).to.eql({regex: /.+?/i});
         });
     });
 

@@ -9,10 +9,10 @@ export type ParserFn = (path: string) => any;
 
 export type ConfigOptions = {
     prefix?: string,
-    rcFile?: string | boolean,
-    argPrefix?: string | boolean,
-    envPrefix?: string | boolean,
-    packageKey?: string | boolean,
+    rcFile?: string,
+    argPrefix?: string,
+    envPrefix?: string,
+    packageKey?: string,
     description?: string,
     /**
      * The order to resolve options.

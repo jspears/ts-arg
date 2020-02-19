@@ -107,7 +107,7 @@ export function Config(prefix?: ConfigOptions | string | ParserFn) {
         Reflect.defineMetadata(configMetadataKey, {
             envPrefix: config.prefix.toUpperCase(),
             argPrefix: config.prefix,
-            rcFile: `.${config.prefix}`,
+            rcFile: `.${config.prefix.toLowerCase()}rc`,
             packageKey: config.prefix,
             resolution: RESOLUTION,
             parser(file) {
@@ -125,10 +125,7 @@ const jsonFn = (v: string) => JSON.parse(v);
 const splitFn = (v) => v.split(/,\s*/);
 const dateFn = (v) => new Date(v);
 const regexFn = (v) => {
-    if (v.startsWith('/') && v.endsWith('/')) {
-        return new RegExp(v);
-    }
-    const parts = /^\/(.+?)\/(gimus)$/.exec(v);
+    const parts = /^\/(.+?)\/([gimus]+?)?$/.exec(v);
     if (parts) {
         return new RegExp(parts[1], parts[2]);
     }
@@ -188,7 +185,7 @@ ${sorted.map(v => `  ${v.required ? '*' : ' '} --${v.long}\t-${v.short}\t${v.des
 };
 
 type ArgTypeInt = ArgType & {
-    _long: string
+    _long: string,
 }
 
 /**
@@ -307,7 +304,7 @@ export const configure = <T>(target: T,
 
             let pkg;
             try {
-                pkg = require.main.require(`./package.json`)[conf.packageKey === true ? conf.prefix : conf.packageKey];
+                pkg = require.main.require(`./package.json`)[conf.packageKey];
             } catch (e) {
                 return false;
             }
@@ -322,7 +319,7 @@ export const configure = <T>(target: T,
 
     order[Resolution.FILE] = (): boolean => {
         if (conf.rcFile) {
-            const pkg = conf.parser(`.${conf.rcFile}`);
+            const pkg = conf.parser(conf.rcFile);
             pkg && argumentConfs.forEach((c) => {
                 if (c._long in pkg) {
                     target[c.key] = pkg[c._long];
