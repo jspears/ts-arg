@@ -128,16 +128,16 @@ export function Config(prefix?: ConfigOptions | string | ConfigParserFn) {
 
 const strFn = (v: string) => v;
 const jsonFn = (v: string) => JSON.parse(v);
-const splitFn = (v) => v.split(/,\s*/);
-const dateFn = (v) => new Date(v);
-const regexFn = (v) => {
+const splitFn = (v: string) => v.split(/,\s*/);
+const dateFn = (v: string) => new Date(v);
+const regexFn = (v: string) => {
     const parts = /^\/(.+?)\/([gimus]+?)?$/.exec(v);
     if (parts) {
         return new RegExp(parts[1], parts[2]);
     }
-    return new RegExp(`/${v}/`);
+    return new RegExp(v);
 };
-const boolFn = (v) => /true|1|"true"/i.test(v);
+const boolFn = (v: string) => v == null ? false : /true|1|"true"/i.test(v);
 
 export const CONVERTERS = new Map<any, Converter>([
     ['Int', v => parseInt(v, 10)],
@@ -234,8 +234,13 @@ export const configure = <T>(target: T,
             }
 
             if (isBoolean(c.type)) {
-                const convert = c.converter || converters.get(c.type) || boolFn;
-                local[c.key] = value != null ? convert(value) : !arg.startsWith('--no-');
+                const isNeg = arg.startsWith('--no-');
+                if (value == null) {
+                    local[c.key] = !isNeg;
+                } else {
+                    const convert = c.converter || converters.get(c.type) || boolFn;
+                    local[c.key] = isNeg ? !convert(value) : convert(value);
+                }
             } else {
                 const convert = c.converter || converters.get(c.type) || strFn;
 
@@ -327,23 +332,23 @@ export const configure = <T>(target: T,
     };
 
     const _configure = (target: T, parent?: string): T | undefined => {
-        const argumentConfs: ArgTypeInt[] = ((args = Reflect.getMetadata(argMetadataKey, target)) => parent ?
+        const argTypes: ArgTypeInt[] = ((args = Reflect.getMetadata(argMetadataKey, target)) => parent ?
             args.map(v => ({...v, short: `${parent}-${v.short}`, long: `${parent}-${v.long}`})) : args)();
 
         if (args.includes('-h') || args.includes('--help')) {
-            help(script, argumentConfs);
+            help(script, argTypes);
             return;
         }
 
         //The last has highest precedent, so we reverse it and go through it.
-        if (resolution.find((r) => order[r](target, argumentConfs)) != null) {
+        if (resolution.find((r) => order[r](target, argTypes)) != null) {
             return;
         }
 
-        const fail = argumentConfs.find(v => v.required && target[v.key] == null);
+        const fail = argTypes.find(v => v.required && target[v.key] == null);
 
         if (fail) {
-            help(script, argumentConfs, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
+            help(script, argTypes, `Required argument '${typeof fail.key == 'string' ? fail.key : fail.long}' was not supplied.`);
             return;
         }
         return target;
