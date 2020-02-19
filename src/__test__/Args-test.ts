@@ -339,7 +339,7 @@ describe('@Arg', function () {
             console.warn = owarn;
 
             expect(warn).to.eql([[
-                "help-script\nusage: -ow\n    --on\t-o\twon \n    --what\t-w\twhat \n\n"
+                "help-script\nusage: -how\n    --help\t-h\tThis helpful message \n    --on\t-o\twon \n    --what\t-w\twhat \n\n"
             ]])
         });
 
@@ -360,7 +360,7 @@ describe('@Arg', function () {
             console.warn = (...args) => warn.push(args);
             expect(configure(new HasError, ['', 'help-script', '--stuff', 'more'])).to.not.exist;
             console.warn = owarn;
-            expect(warn[0][0]).to.contains("Converting 'more' to type 'string' failed\n Error more\n\nhelp-script\nusage: -s\n    --stuff\t-s\t \n\n");
+            expect(warn[0][0]).to.contains("Converting 'more' to type 'string' failed\n Error more");
 
         })
     });

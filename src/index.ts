@@ -198,6 +198,11 @@ const _help: HelpFn = (script: string, conf: ArgType[], message?: string): void 
     if (message) {
         message = `${chalk.red('Error')}: ${message}\n\n`
     }
+    sorted.unshift({
+        long: 'help',
+        short: 'h',
+        description: 'This helpful message'
+    });
     console.warn(`${message || ''}${script}\nusage: ${_usage(sorted)}
 ${sorted.map(v => `  ${v.required ? '*' : ' '} --${toHyphen(v.long)}\t-${v.short}\t${v.description || ''} `).join('\n')}
 
