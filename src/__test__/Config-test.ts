@@ -57,7 +57,7 @@ describe('@Config', function () {
                 what: boolean
             }
 
-            const res = configure(new ConfigIt, ['', 'test', '--no-config-what'], {what: 'MORE'});
+            const res = configure(new ConfigIt, args('--no-config-what'), {what: 'MORE'});
             expect(res).to.eql({what: false})
         });
         it('should configure negative arg env', function () {
@@ -67,7 +67,7 @@ describe('@Config', function () {
                 what: boolean
             }
 
-            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '1'});
+            const res = configure(new ConfigIt, args(), {NO_CONFIG_WHAT: '1'});
             expect(res).to.eql({what: false})
         });
 
@@ -78,7 +78,7 @@ describe('@Config', function () {
                 what: boolean
             }
 
-            const res = configure(new ConfigIt, ['', 'test'], {NO_CONFIG_WHAT: '0'});
+            const res = configure(new ConfigIt, args(), {NO_CONFIG_WHAT: '0'});
             expect(res).to.eql({what: true})
         });
 
@@ -89,7 +89,7 @@ describe('@Config', function () {
                 what: number
             }
 
-            const res = configure(new ConfigIt, ['', 'test', '--config-what=2'], {CONFIG_WHAT: '1'});
+            const res = configure(new ConfigIt, args('--config-what=2'), {CONFIG_WHAT: '1'});
             expect(res).to.eql({what: 2})
         });
 

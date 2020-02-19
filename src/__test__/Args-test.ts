@@ -29,7 +29,7 @@ describe('@Arg', function () {
         });
         it('should work with camelCase no arg', function () {
             class Camel {
-                @Arg()
+                @Arg({short: 'c'})
                 hasCamel: boolean;
             }
 
@@ -37,7 +37,7 @@ describe('@Arg', function () {
         });
         it('should work with camelCase =true', function () {
             class Camel {
-                @Arg()
+                @Arg({short: 'c'})
                 hasCamel: boolean;
             }
 
@@ -45,7 +45,7 @@ describe('@Arg', function () {
         });
         it('should work with camelCase =false', function () {
             class Camel {
-                @Arg()
+                @Arg({short: 'c'})
                 hasCamel: boolean;
             }
 
@@ -291,6 +291,35 @@ describe('@Arg', function () {
     });
 
     describe('errors', function () {
+        it('should error when short is h', function () {
+            let error;
+            try {
+                class Help {
+                    @Arg()
+                    hey: string;
+                }
+            } catch (e) {
+                error = e.message;
+            } finally {
+                expect(error).to.eql('-h is always help, please assign a different short value for \'hey\'');
+            }
+
+        });
+        it('should error when long is help', function () {
+            let error;
+            try {
+                class Help {
+                    @Arg()
+                    help: string;
+                }
+            } catch (e) {
+                error = e.message;
+            } finally {
+                expect(error).to.eql('--help is always help, please assign a different long value for \'help\'');
+            }
+
+        });
+
         it('should error when 2 properties have same short', function () {
             let error;
             try {
@@ -301,7 +330,7 @@ describe('@Arg', function () {
                     won: string;
                 }
             } catch (e) {
-                error = e;
+                error = e.message;
             } finally {
                 expect(error).to.eql('Can not have 2 properties with same long or short names. \'what\' or \'w\' is already used, check \'what\'.');
             }
@@ -317,7 +346,7 @@ describe('@Arg', function () {
                     on: string;
                 }
             } catch (e) {
-                error = e;
+                error = e.message;
             } finally {
                 expect(error).to.eql('There are multiple properties marked as default, check \'what\'');
             }
@@ -374,6 +403,21 @@ describe('@Arg', function () {
             }
 
             test(HasSymbol, {[key]: 'what'}, '--test', 'what');
+        });
+
+        it('should  error with symbols', function () {
+            const key = Symbol('test');
+            let error;
+            try {
+                class HasSymbol {
+                    @Arg()
+                    [key]: string
+                }
+            } catch (e) {
+                error = e.message;
+            } finally {
+                expect(error).to.eql('When annotating a symbol, a long argument descriptor is required');
+            }
         })
     });
     describe("Int", function () {

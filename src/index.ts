@@ -65,6 +65,9 @@ const RESOLUTION: Resolution[] = [Resolution.ARG, Resolution.ENV, Resolution.FIL
 const toHyphen = (str: string, sep = '-') => str.replace(/([a-z])?([A-Z])/g, (_, a, b) => ((a == null ? '' : `${a}${sep}`) + b.toLowerCase()));
 
 const addArg = (target: any, conf: ArgType, propertyKey: string | symbol | number, type: any): ArgTypeInt[] => {
+    if (typeof propertyKey === 'symbol' && !conf.long) {
+        throw new Error(`When annotating a symbol, a long argument descriptor is required`);
+    }
     const long = conf.long || typeof propertyKey === 'symbol' ? conf.long : propertyKey + '';
     const arg: ArgTypeInt = {
         long,
@@ -75,18 +78,25 @@ const addArg = (target: any, conf: ArgType, propertyKey: string | symbol | numbe
         _long: long,
     };
 
+    if (arg.long === 'help') {
+        throw new Error(`--help is always help, please assign a different long value for '${long}'`);
+    }
+
+    if (arg.short === 'h') {
+        throw new Error(`-h is always help, please assign a different short value for '${long}'`);
+    }
 
     const m = Reflect.getMetadata(argMetadataKey, target) as ArgTypeInt[];
 
     if (m) {
         const sameLongOrShort = m.find(({long, short}) => long == arg.long || short == arg.short);
         if (sameLongOrShort) {
-            throw `Can not have 2 properties with same long or short names. '${sameLongOrShort.long}' or '${sameLongOrShort.short}' is already used, check '${niceKey(sameLongOrShort)}'.`;
+            throw new Error(`Can not have 2 properties with same long or short names. '${sameLongOrShort.long}' or '${sameLongOrShort.short}' is already used, check '${niceKey(sameLongOrShort)}'.`);
         }
         if (arg.default) {
             const hasDefault = m.find(v => v.default);
             if (hasDefault) {
-                throw `There are multiple properties marked as default, check '${niceKey(hasDefault)}'`;
+                throw new Error(`There are multiple properties marked as default, check '${niceKey(hasDefault)}'`);
             }
         }
         m.push(arg);
