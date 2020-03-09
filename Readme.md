@@ -92,7 +92,7 @@ Then options can be provided via cli:
 ```
 or they can be combined with ENV
 ```sh
- $ MY_APP_VERBOSE=1 ./bin/myapp.js --myapp-name=stuff ./path/to/thing.
+ $ MYAPP_VERBOSE=1 ./bin/myapp.js --myapp-name=stuff ./path/to/thing.
 ```
 and it could be combined with `package.json`
 ```json
