@@ -4,7 +4,11 @@ Tool for making decorator based command line argument parsers.
 More info [here](https://jspears.github.io/ts-arg/)
 
 ## Installation
-To use this tool you need to have ``` "experimentalDecorators": true,  "emitDecoratorMetadata": true,``` 
+To use this tool you need to have 
+``` 
+"experimentalDecorators": true,  
+"emitDecoratorMetadata": true,
+``` 
 either in your tsconfig.json or your command line parameters.
 
 ![Node.js CI](https://github.com/jspears/ts-arg/workflows/Node.js%20CI/badge.svg)
