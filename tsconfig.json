@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "target": "ES5",
     "allowJs": false,
-    "declaration": false,
+    "declaration": true,
     "lib": [
       "es2018"
     ]

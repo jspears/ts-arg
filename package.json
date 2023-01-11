@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "description": "Decorator based argument parsing for typescript",
   "main": "lib",
-  "types": "src",
+  "types": "lib",
   "repository": "https://github.com/jspears/ts-arg",
   "author": "speajus@gmail.com",
   "license": "MIT",
